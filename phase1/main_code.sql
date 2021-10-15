@@ -12,14 +12,6 @@ CREATE TABLE Student(
       dept_name VARCHAR(10) NOT NULL
 );
 
-CREATE TABLE Section(
-      section_id INTEGER NOT NULL PRIMARY KEY,
-      course_id CHAR(5) NOT NULL,
-      semester INTEGER NOT NULL,
-      year INTEGER NOT NULL,
-      FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
-);
-
 CREATE TABLE Course_Catalog (
       course_id char(5) primary key,
       L numeric NOT NULL,
@@ -62,4 +54,23 @@ CREATE TABLE Student_Registration (
       section_id int NOT NULL,
       FOREIGN KEY(student_id) REFERENCES Student(student_id),
       FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
+);
+
+CREATE TABLE Section(
+      section_id INTEGER NOT NULL PRIMARY KEY,
+      course_id CHAR(5) NOT NULL,
+      semester INTEGER NOT NULL,
+      year INTEGER NOT NULL,
+      FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
+);
+
+CREATE TABLE prerequisites (
+      course_id char(5) primary key,
+      course_id1 char(5),
+      course_id2 char(5),
+      course_id3 char(5),
+      FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
+      FOREIGN KEY(course_id1) REFERENCES Course_Catalog(course_id),
+      FOREIGN KEY(course_id2) REFERENCES Course_Catalog(course_id),
+      FOREIGN KEY(course_id3) REFERENCES Course_Catalog(course_id)
 );
