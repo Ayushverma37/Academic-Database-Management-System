@@ -47,7 +47,7 @@ CREATE TABLE Course_Offering (
       FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
       FOREIGN KEY(ins_id1) REFERENCES Instructor(ins_id),
       FOREIGN KEY(ins_id2) REFERENCES Instructor(ins_id),
-      FOREIGN KEY(ins_id3) REFERENCES Instructor(ins_id),
+      FOREIGN KEY(ins_id3) REFERENCES Instructor(ins_id)
 );
 
 -- different table for containing all timetable slots?
