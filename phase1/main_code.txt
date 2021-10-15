@@ -1,0 +1,4 @@
+CREATE TABLE Instructor( ins_id INTEGER NOT NULL PRIMARY KEY, first_name VARCHAR(10) NOT NULL, last_name VARCHAR(10) NOT NULL, dept_name VARCHAR(10) NOT NULL);
+CREATE TABLE Student( student_id INTEGER NOT NULL PRIMARY KEY, first_name VARCHAR(10) NOT NULL, last_name VARCHAR(10) NOT NULL, dept_name VARCHAR(10) NOT NULL);
+CREATE TABLE Section( section_id INTEGER NOT NULL PRIMARY KEY, course_id CHAR(5) NOT NULL,  semester INTEGER NOT NULL, year INTEGER NOT NULL, FOREIGN KEY(course_id) REFERENCES Course_Offering(course_id));
+
