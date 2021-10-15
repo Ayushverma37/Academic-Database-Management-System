@@ -51,15 +51,15 @@ CREATE TABLE Course_Offering (
 );
 
 -- different table for containing all timetable slots?
--- section kaise allot hoga to student ?
--- section_id foreign key hoga in student registration ?
+-- how to allot section kaise to student ?
+-- is section_id foreign in student registration ?
 
 CREATE TABLE Student_Registration (
       student_id int primary key,
       course_id char(5) NOT NULL,
       semester int NOT NULL,
       year int NOT NULL,
-      section_id NOT NULL,
+      section_id int NOT NULL,
       FOREIGN KEY(student_id) REFERENCES Student(student_id),
       FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
 );
