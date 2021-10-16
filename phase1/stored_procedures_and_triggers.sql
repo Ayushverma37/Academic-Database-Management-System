@@ -64,11 +64,15 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
+new_course_timetable_slot varchar(10);
+old_course_timetable_slot varchar(10);
 student_registration_row record;
 BEGIN
-FOR student_registration_row select * from Student_Registration where student_id = NEW.student_id
+select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
+FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
 LOOP
-if NEW.timetable_slot = student_registration_row.timetable_slot then
+select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
+if new_course_timetable_slot = old_course_timetable_slot then
   raise exception 'INSERTION FAILED: Course in timetable slot already exists';
 end if;
 END LOOP;
