@@ -224,7 +224,7 @@ EXECUTE PROCEDURE _check_prerequisites();
 
 
 --trigger and procedure to check if student meets the cgpa criteria of the course before registering
---procedure to be implemented : gradeOf(student_id)
+--procedure to be implemented : gradeOf(student_id) ____ done
 
 create or replace function get_course(stud_id char(11))
 returns table (course_id char(5),grade INTEGER)
@@ -288,7 +288,7 @@ EXECUTE PROCEDURE _check_cgpa();
 
 
 --trigger and procedure to check if the course max capacity has not been achieved
---procedure to be implemented : maxCapacityOf(course_id)
+--procedure to be implemented : maxCapacityOf(course_id) ____ done
 CREATE OR REPLACE FUNCTION maxCapacityOf(input_course_id char(5), input_semester INTEGER, input_year INTEGER)
 RETURNS INTEGER
 LANGUAGE plpgsql
