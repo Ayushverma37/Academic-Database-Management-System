@@ -1,6 +1,7 @@
 -- implementation of stores procedures and triggers
 
---trigger and procedure to check if student meets the cgpa criteria of the course before regiestering
+--trigger and procedure to check if student meets the cgpa criteria of the course before registering
+--procedure to be implemented : gradeOf(student_id)
 CREATE OR REPLACE FUNCTION _check_cgpa()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
@@ -29,6 +30,7 @@ EXECUTE PROCEDURE _check_cgpa();
 
 
 --trigger and procedure to check if the course max capacity has not been achieved
+--procedure to be implemented : maxCapacityOf(course_id)
 CREATE OR REPLACE FUNCTION _check_capacity()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
