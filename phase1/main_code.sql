@@ -1,3 +1,19 @@
+-- Tables created
+--                List of relations
+-- Schema |         Name         | Type  |  Owner   
+--------+----------------------+-------+----------
+-- public | course_catalog       | table | postgres
+-- public | course_offering      | table | postgres
+-- public | instructor           | table | postgres
+-- public | section              | table | postgres
+-- public | student              | table | postgres
+-- public | student_registration | table | postgres
+-- public | timetable_slot_list  | table | postgres
+--(7 rows)
+
+
+
+-- Table of all instructors for an institute
 CREATE TABLE Instructor(
       ins_id INTEGER NOT NULL PRIMARY KEY,
       first_name VARCHAR(10) NOT NULL,
@@ -5,6 +21,7 @@ CREATE TABLE Instructor(
       dept_name VARCHAR(10) NOT NULL
 );
 
+-- Table of all students for an institute
 CREATE TABLE Student(
       student_id INTEGER NOT NULL PRIMARY KEY,
       first_name VARCHAR(10) NOT NULL,
@@ -12,65 +29,68 @@ CREATE TABLE Student(
       dept_name VARCHAR(10) NOT NULL
 );
 
+-- Table of course catalog, contains 3 pre-requisites also
 CREATE TABLE Course_Catalog (
-      course_id char(5) primary key,
-      L numeric NOT NULL,
-      T numeric NOT NULL,
-      P numeric NOT NULL,
-      S numeric NOT NULL,
-      C numeric NOT NULL
+    course_id char(5) primary key,
+    L numeric NOT NULL,
+    T numeric NOT NULL,
+    P numeric NOT NULL,
+    S numeric NOT NULL,
+    C numeric NOT NULL,
+    course_id1 char(5),
+    course_id2 char(5),
+    course_id3 char(5)
 );
 
+-- Table for timetable slots
+CREATE TABLE Timetable_slot_list(
+    timetable_slot char(5) PRIMARY KEY
+);
+
+-- Table for course offering, course_id, semester, year, ins_id are primary keys
+-- should timetable slot be primary key as well ? -- Yes
 CREATE TABLE Course_Offering (
-      course_id char(5) primary key,
-      semester int NOT NULL,
-      year int NOT NULL,
-      cgpa_criterion numeric NOT NULL,
-      maxCapacity int NOT NULL,
-      course_id_Not_Elligible char(5) NOT NULL ,
-      ins_id1 int NOT NULL,
-      ins_id2 int NOT NULL,
-      ins_id3 int NOT NULL,
-      timetable_slot varchar(10) NOT NULL,
-      branch1 char(5),
-      branch2 char(5),
-      branch3 char(5),
-      FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
-      FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
-      FOREIGN KEY(ins_id1) REFERENCES Instructor(ins_id),
-      FOREIGN KEY(ins_id2) REFERENCES Instructor(ins_id),
-      FOREIGN KEY(ins_id3) REFERENCES Instructor(ins_id)
+    course_id CHAR(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    ins_id INTEGER NOT NULL,
+    cgpa_criterion numeric NOT NULL,
+    maxCapacity INTEGER NOT NULL,
+    course_id_Not_Elligible char(5) NOT NULL ,
+    timetable_slot varchar(10) NOT NULL,
+    branch1 char(5),
+    branch2 char(5),
+    branch3 char(5),
+    FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
+    FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
+    FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id),
+    FOREIGN KEY(timetable_slot) REFERENCES Timetable_slot_list(timetable_slot),
+    PRIMARY KEY(course_id, semester, year)
 );
 
--- different table for containing all timetable slots?
--- how to allot section kaise to student ?
--- is section_id foreign in student registration ?
+-- different table for containing all timetable slots? 
+-- how to allot section kaise to student ? -- create a procedure
+-- is section_id foreign in student registration ? -- yes
 
-CREATE TABLE Student_Registration (
-      student_id int primary key,
-      course_id char(5) NOT NULL,
-      semester int NOT NULL,
-      year int NOT NULL,
-      section_id int NOT NULL,
-      FOREIGN KEY(student_id) REFERENCES Student(student_id),
-      FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
-);
-
+-- Table for sections
 CREATE TABLE Section(
-      section_id INTEGER NOT NULL PRIMARY KEY,
-      course_id CHAR(5) NOT NULL,
-      semester INTEGER NOT NULL,
-      year INTEGER NOT NULL,
-      FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
+    section_id INTEGER NOT NULL,
+    course_id CHAR(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    classroom char(5) NOT NULL,
+    PRIMARY KEY(section_id, course_id, semester, year),
+    FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
 );
 
-CREATE TABLE prerequisites (
-      course_id char(5) primary key,
-      course_id1 char(5),
-      course_id2 char(5),
-      course_id3 char(5),
-      FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
-      FOREIGN KEY(course_id1) REFERENCES Course_Catalog(course_id),
-      FOREIGN KEY(course_id2) REFERENCES Course_Catalog(course_id),
-      FOREIGN KEY(course_id3) REFERENCES Course_Catalog(course_id)
+-- Table for student registration relationship, is section_id required to be a primary key
+CREATE TABLE Student_Registration (
+    student_id INTEGER,
+    course_id char(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    section_id INTEGER NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES Student(student_id),
+    FOREIGN KEY(course_id, semester, year, section_id) REFERENCES Section(course_id, semester, year, section_id),
+    PRIMARY KEY(student_id, course_id, semester, year, section_id)
 );
