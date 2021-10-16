@@ -14,7 +14,7 @@ BEGIN
     IF curr_grade<cgpaReq THEN
     RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
     END IF;
-    return new;
+    return NEW;
 END;
 $$;
 
@@ -39,7 +39,7 @@ BEGIN
     IF currentCapacity>=courseCapacity THEN
     RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
     END IF;
-    return new;
+    return NEW;
 END;
 $$;
 
