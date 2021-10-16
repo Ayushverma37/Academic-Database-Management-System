@@ -62,6 +62,55 @@ EXECUTE PROCEDURE check_course_in_timetable_slot();
 
 
 
+
+
+
+
+-- procedure to get credits registered in previous 2 semesters
+-- modify if previous semester are in different year than current one
+CREATE OR REPLACE FUNCTION get_registered_credits_previous_2_semester(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
+RETURNS NUMERIC
+LANGUAGE PLPGSQL 
+AS $$
+DECLARE
+trans_student_row record;
+credit_of_previous NUMERIC;
+temp NUMERIC;
+BEGIN 
+for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP 
+if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
+select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+credit_of_previous := credit_of_previous + temp;
+end if;
+if trans_student_row.semester = input_semester-2 AND trans_student_row.year = input_year THEN
+select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+credit_of_previous := credit_of_previous + temp;
+end if;
+END LOOP;
+return credit_of_previous;
+END;
+$$;
+
+-- procedure to get credits registered in this semester
+CREATE OR REPLACE FUNCTION get_credits_registered_in_this_sem(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
+RETURNS NUMERIC 
+LANGUAGE PLPGSQL 
+AS $$
+DECLARE
+registration_row record;
+credits_current NUMERIC;
+temp NUMERIC;
+BEGIN 
+for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
+select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
+credits_current := credits_current + temp;
+END LOOP;
+return credits_current;
+END;
+$$;
+
+--implement procedure for ticket generation 
+
 -- trigger and stored procedure to check for credit limit of 1.25
 -- procedures to be implemented:
 -- get_registered_credits_previous_2_semester
@@ -77,9 +126,9 @@ max_credits_allowed numeric;
 credits_in_this_sem numeric;
 credits_for_new_course numeric;
 BEGIN
-credits_registered := get_registered_credits_previous_2_semester(NEW.student_id);
+credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
 max_credits_allowed := 1.25*credits_registered;
-credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
+credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
 select CO.c into credit_for_new_course from Course_Offering as CO where CO.course_id = NEW.course_id;
 if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
 --ticket generation function call 
@@ -93,6 +142,9 @@ Before INSERT
 ON Student_Registration
 FOR EACH ROW 
 EXECUTE PROCEDURE check_credit_limit();
+
+
+
 
 
 
