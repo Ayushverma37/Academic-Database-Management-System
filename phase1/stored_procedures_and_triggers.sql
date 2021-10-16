@@ -25,6 +25,9 @@ FOR EACH ROW
 EXECUTE PROCEDURE _check_cgpa();
 
 
+
+
+
 --trigger and procedure to check if the course max capacity has not been achieved
 CREATE OR REPLACE FUNCTION _check_capacity()
 RETURNS TRIGGER
@@ -33,12 +36,25 @@ AS $$
 DECLARE
 courseCapacity integer;
 currentCapacity integer;
+BEGIN
+    currentCapacity:=maxCapacityOf(NEW.course_id);
+    select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
+    IF currentCapacity>=courseCapacity THEN
+    RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
+    END IF;
+    return NEW;
+END;
+$$;
 
 CREATE TRIGGER check_capacity
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _check_capacity();
+
+
+
+
 
 --trigger and procedure to ensure that a student takes only 1 course in a timetable slot
 CREATE OR REPLACE FUNCTION check_course_in_timetable_slot()
@@ -63,6 +79,10 @@ Before INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE check_course_in_timetable_slot();
+
+
+
+
 
 -- trigger and stored procedure to check for credit limit of 1.25
 -- procedures to be implemented:
@@ -95,12 +115,4 @@ Before INSERT
 ON Student_Registration
 FOR EACH ROW 
 EXECUTE PROCEDURE check_credit_limit();
-BEGIN
-    currentCapacity:=maxCapacityOf(NEW.course_id);
-    select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
-    IF currentCapacity>=courseCapacity THEN
-    RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
-    END IF;
-    return NEW;
-END;
-$$;
+
