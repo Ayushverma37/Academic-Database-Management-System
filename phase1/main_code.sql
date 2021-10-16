@@ -23,7 +23,7 @@ CREATE TABLE Instructor(
 
 -- Table of all students for an institute
 CREATE TABLE Student(
-      student_id INTEGER NOT NULL PRIMARY KEY,
+      student_id char(11) NOT NULL PRIMARY KEY,
       first_name VARCHAR(10) NOT NULL,
       last_name VARCHAR(10) NOT NULL,
       dept_name VARCHAR(10) NOT NULL
@@ -87,7 +87,7 @@ CREATE TABLE Section(
 -- Table for student registration relationship, is section_id required to be a primary key ? -- assumed no
 -- because each student can be in only one section of a particular course
 CREATE TABLE Student_Registration (
-    student_id INTEGER,
+    student_id char(11),
     course_id char(5) NOT NULL,
     semester INTEGER NOT NULL,
     year INTEGER NOT NULL,
