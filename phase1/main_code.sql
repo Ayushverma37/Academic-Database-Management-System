@@ -1,7 +1,7 @@
 -- Tables created
 --                List of relations
 -- Schema |         Name         | Type  |  Owner   
---------+----------------------+-------+----------
+----------+----------------------+-------+----------
 -- public | course_catalog       | table | postgres
 -- public | course_offering      | table | postgres
 -- public | instructor           | table | postgres
@@ -69,7 +69,7 @@ CREATE TABLE Course_Offering (
 );
 
 -- different table for containing all timetable slots? 
--- how to allot section kaise to student ? -- create a procedure
+-- how to allot section to student ? -- create a procedure
 -- is section_id foreign in student registration ? -- yes
 
 -- Table for sections
@@ -83,7 +83,8 @@ CREATE TABLE Section(
     FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
 );
 
--- Table for student registration relationship, is section_id required to be a primary key
+-- Table for student registration relationship, is section_id required to be a primary key ? -- assumed no
+-- because each student can be in only one section of a particular course
 CREATE TABLE Student_Registration (
     student_id INTEGER,
     course_id char(5) NOT NULL,
@@ -92,5 +93,8 @@ CREATE TABLE Student_Registration (
     section_id INTEGER NOT NULL,
     FOREIGN KEY(student_id) REFERENCES Student(student_id),
     FOREIGN KEY(course_id, semester, year, section_id) REFERENCES Section(course_id, semester, year, section_id),
-    PRIMARY KEY(student_id, course_id, semester, year, section_id)
+    PRIMARY KEY(student_id, course_id, semester, year)
 );
+
+-- TODO: create table for tickets
+-- Create templates for grades table
