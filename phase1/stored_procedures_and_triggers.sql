@@ -1,35 +1,6 @@
 -- implementation of stores procedures and triggers
 
 
---trigger and procedure to check if the course max capacity has not been achieved
---procedure to be implemented : maxCapacityOf(course_id)
-CREATE OR REPLACE FUNCTION _check_capacity()
-RETURNS TRIGGER
-LANGUAGE PLPGSQL
-AS $$
-DECLARE
-courseCapacity integer;
-currentCapacity integer;
-BEGIN
-    currentCapacity:=maxCapacityOf(NEW.course_id);
-    select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
-    IF currentCapacity>=courseCapacity THEN
-    RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
-    END IF;
-    return NEW;
-END;
-$$;
-
-CREATE TRIGGER check_capacity
-BEFORE INSERT
-ON Student_Registration
-FOR EACH ROW
-EXECUTE PROCEDURE _check_capacity();
-
-
-
-
-
 --trigger and procedure to ensure that a student takes only 1 course in a timetable slot
 CREATE OR REPLACE FUNCTION check_course_in_timetable_slot()
 RETURNS TRIGGER
@@ -313,6 +284,49 @@ BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _check_cgpa();
+
+
+
+--trigger and procedure to check if the course max capacity has not been achieved
+--procedure to be implemented : maxCapacityOf(course_id)
+CREATE OR REPLACE FUNCTION maxCapacityOf(input_course_id char(5), input_semester INTEGER, input_year INTEGER)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+cap INTEGER:=0;
+registration_row record;
+BEGIN
+    for registration_row in select * from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year
+    LOOP
+    cap:=cap+1;
+    END LOOP;
+    return cap; 
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION _check_capacity()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+courseCapacity integer;
+currentCapacity integer;
+BEGIN
+    currentCapacity:=maxCapacityOf(NEW.course_id,NEW.semester, NEW.year);
+    select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
+    IF currentCapacity>=courseCapacity THEN
+    RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
+    END IF;
+    return NEW;
+END;
+$$;
+
+CREATE TRIGGER check_capacity
+BEFORE INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _check_capacity();
 
 
 
