@@ -220,6 +220,12 @@ BEGIN
 END;
 $$;
 
+CREATE TRIGGER check_prerequisites
+BEFORE INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _check_prerequisites(); 
+
 
 
 
