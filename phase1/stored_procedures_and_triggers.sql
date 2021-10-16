@@ -118,3 +118,45 @@ ON Student_Registration
 FOR EACH ROW 
 EXECUTE PROCEDURE check_credit_limit();
 
+
+
+
+-- tigger to create new table for every new entry into course offering
+CREATE OR REPLACE FUNCTION create_course_grade_table()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+BEGIN
+EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade char(1));', 'Grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
+RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER course_grade_table
+AFTER INSERT
+ON Course_Offering
+FOR EACH ROW
+EXECUTE PROCEDURE create_course_grade_table();
+
+
+
+
+
+-- trigger to create new table for every new entry into student table
+CREATE OR REPLACE FUNCTION create_trans_student_table()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+BEGIN
+EXECUTE format('CREATE TABLE %I (course_id, semester, year, grade);', 'Trans_'||NEW.student_id );
+END;
+$$;
+
+CREATE TRIGGER trans_student_grade
+AFTER INSERT
+ON Student
+FOR EACH ROW
+EXECUTE PROCEDURE create_trans_student_table();
+
+
+
