@@ -125,13 +125,15 @@ EXECUTE PROCEDURE check_credit_limit();
 
 
 
+
+
 -- tigger to create new table for every new entry into course offering
 CREATE OR REPLACE FUNCTION create_course_grade_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade char(1));', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
+EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
 RETURN NULL;
 END;
 $$;
@@ -146,13 +148,15 @@ EXECUTE PROCEDURE create_course_grade_table();
 
 
 
+
+
 -- trigger to create new table for every new entry into student table
 CREATE OR REPLACE FUNCTION create_trans_student_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade char(1) NOT NULL);', 'trans_'||NEW.student_id );
+EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade INTEGER NOT NULL);', 'trans_'||NEW.student_id );
 RETURN NULL;
 END;
 $$;
@@ -167,7 +171,20 @@ EXECUTE PROCEDURE create_trans_student_table();
 
 
 
+
+
+
 --trigger and procedure to check if student meets the pre-requisites of the course before registering
+--trigger and procedure to check if student meets the pre-requisites of the course before registering
+create or replace function get_prereq (cid char(5), stud_id char(11))
+returns table (course char(5),grade INTEGER)
+LANGUAGE plpgsql AS $$
+begin
+return query EXECUTE format('select course_id, grade from %I as TS where TS.course_id=%L and TS.grade>2.0;', 'trans_'||stud_id, cid);
+end; $$;
+
+
+
 CREATE OR REPLACE FUNCTION _check_prerequisites()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
@@ -177,26 +194,33 @@ prereq1 char(5);
 prereq2 char(5);
 prereq3 char(5);
 BEGIN
-    select course_id1, course_id2, course_id3 into prereq1, prereq2, prereq3 from Course_Catalog as CC where CC.course.id=NEW.course_id;
+    select course_id1, course_id2, course_id3 into prereq1, prereq2, prereq3 from Course_Catalog as CC where CC.course_id=NEW.course_id;
     IF prereq1<>'NULL' THEN
-        IF NOT EXISTS (select * from trans_student_id as TS where prereq1=TS.course_id and TS.grade>2.0)
+    BEGIN
+        IF NOT EXISTS (select * from get_prereq(prereq1,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq1;
         END IF;
+    END;
+    END IF;
     IF prereq2<>'NULL' THEN
-        IF NOT EXISTS (select * from trans_student_id as TS where prereq2=TS.course_id and TS.grade>2.0)
+    BEGIN
+        IF NOT EXISTS (select * from get_prereq(prereq2,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq2;
         END IF;
+    END;
+    END IF;
     IF prereq3<>'NULL' THEN
-        IF NOT EXISTS (select * from trans_student_id as TS where prereq3=TS.course_id and TS.grade>2.0)
+    BEGIN
+        IF NOT EXISTS (select * from get_prereq(prereq3,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq3;
         END IF;
+    END;
     END IF;
     return NEW;
 END;
 $$;
 
-CREATE TRIGGER check_prerequisites
-BEFORE INSERT
-ON Student_Registration
-FOR EACH ROW
-EXECUTE PROCEDURE _check_prerequisites();
+
+
+
+
