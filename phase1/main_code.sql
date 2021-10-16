@@ -47,8 +47,9 @@ CREATE TABLE Timetable_slot_list(
     timetable_slot char(5) PRIMARY KEY
 );
 
--- Table for course offering, course_id, semester, year, ins_id are primary keys
--- should timetable slot be primary key as well ? -- Yes
+-- Table for course offering, course_id, semester, year are primary keys
+-- should timetable slot be primary key as well ? -- No
+-- should ins_id be primary key as well ? -- No
 CREATE TABLE Course_Offering (
     course_id CHAR(5) NOT NULL,
     semester INTEGER NOT NULL,
