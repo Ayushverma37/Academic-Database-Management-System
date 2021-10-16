@@ -127,7 +127,7 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade char(1));', 'Grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
+EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade char(1));', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
 RETURN NULL;
 END;
 $$;
@@ -148,7 +148,8 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (course_id, semester, year, grade);', 'Trans_'||NEW.student_id );
+EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade char(1) NOT NULL);', 'trans_'||NEW.student_id );
+RETURN NULL;
 END;
 $$;
 
@@ -157,6 +158,8 @@ AFTER INSERT
 ON Student
 FOR EACH ROW
 EXECUTE PROCEDURE create_trans_student_table();
+
+
 
 
 
