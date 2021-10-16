@@ -34,6 +34,12 @@ DECLARE
 courseCapacity integer;
 currentCapacity integer;
 
+CREATE TRIGGER check_capacity
+BEFORE INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _check_capacity();
+
 --trigger and procedure to ensure that a student takes only 1 course in a timetable slot
 CREATE OR REPLACE FUNCTION check_course_in_timetable_slot()
 RETURNS TRIGGER
@@ -98,11 +104,3 @@ BEGIN
     return NEW;
 END;
 $$;
-
-CREATE TRIGGER check_capacity
-BEFORE INSERT
-ON Student_Registration
-FOR EACH ROW
-EXECUTE PROCEDURE _check_capacity();
-
-
