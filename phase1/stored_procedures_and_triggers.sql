@@ -1,33 +1,5 @@
 -- implementation of stores procedures and triggers
 
---trigger and procedure to check if student meets the cgpa criteria of the course before registering
---procedure to be implemented : gradeOf(student_id)
-CREATE OR REPLACE FUNCTION _check_cgpa()
-RETURNS TRIGGER
-LANGUAGE PLPGSQL
-AS $$
-DECLARE
-curr_grade numeric;
-cgpaReq numeric;
-BEGIN
-    curr_grade:=gradeOf(NEW.student_id);
-    select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
-    IF curr_grade<cgpaReq THEN
-    RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
-    END IF;
-    return NEW;
-END;
-$$;
-
-CREATE TRIGGER check_cgpa
-BEFORE INSERT
-ON Student_Registration
-FOR EACH ROW
-EXECUTE PROCEDURE _check_cgpa();
-
-
-
-
 
 --trigger and procedure to check if the course max capacity has not been achieved
 --procedure to be implemented : maxCapacityOf(course_id)
@@ -225,6 +197,70 @@ BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _check_prerequisites(); 
+
+
+
+--trigger and procedure to check if student meets the cgpa criteria of the course before registering
+--procedure to be implemented : gradeOf(student_id)
+
+create or replace function get_course(stud_id char(11))
+returns table (course_id char(5),grade INTEGER)
+LANGUAGE plpgsql AS $$
+begin
+return query EXECUTE format('select course_id, grade from %I as TS;', 'trans_'||stud_id);
+end; $$;
+
+
+
+CREATE OR REPLACE FUNCTION curr_cgpa(stud_id char(11))
+RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+curr_course char(5);
+curr_credits numeric;
+curr_grade integer;
+total_credits numeric:=0;
+courseAndGrade_row record;
+cgpa numeric:=0;
+sum numeric:=0;
+BEGIN
+    for courseAndGrade_row in (select * from get_course(stud_id))
+    LOOP
+    select courseAndGrade_row.course_id, courseAndGrade_row.grade into curr_course, curr_grade;
+    select CC.C into curr_credits from Course_Catalog as CC where CC.course_id=curr_course;
+    IF curr_grade<>'NULL' then
+    total_credits:=total_credits+curr_credits;
+    sum:=sum+(curr_grade*curr_credits);
+    END IF;
+    END LOOP;
+    cgpa:=sum/total_credits;
+    RETURN cgpa;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION _check_cgpa()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+curr_grade numeric;
+cgpaReq numeric;
+BEGIN
+    curr_grade:=curr_cgpa(NEW.student_id);
+    select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
+    IF curr_grade<cgpaReq THEN
+    RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
+    END IF;
+    return NEW;
+END;
+$$;
+
+CREATE TRIGGER check_cgpa
+BEFORE INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _check_cgpa();
 
 
 
