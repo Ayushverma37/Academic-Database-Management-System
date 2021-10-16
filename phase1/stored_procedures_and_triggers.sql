@@ -297,10 +297,7 @@ DECLARE
 cap INTEGER:=0;
 registration_row record;
 BEGIN
-    for registration_row in select * from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year
-    LOOP
-    cap:=cap+1;
-    END LOOP;
+    select count(*) into cap from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year;
     return cap; 
 END;
 $$;
