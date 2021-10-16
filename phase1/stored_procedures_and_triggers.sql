@@ -160,3 +160,36 @@ EXECUTE PROCEDURE create_trans_student_table();
 
 
 
+--trigger and procedure to check if student meets the pre-requisites of the course before registering
+CREATE OR REPLACE FUNCTION _check_prerequisites()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+prereq1 char(5);
+prereq2 char(5);
+prereq3 char(5);
+BEGIN
+    select course_id1, course_id2, course_id3 into prereq1, prereq2, prereq3 from Course_Catalog as CC where CC.course.id=NEW.course_id;
+    IF prereq1<>'NULL' THEN
+        IF NOT EXISTS (select * from trans_student_id as TS where prereq1=TS.course_id and TS.grade>2.0)
+        RAISE EXCEPTION 'pre-requisite % not met by student',prereq1;
+        END IF;
+    IF prereq2<>'NULL' THEN
+        IF NOT EXISTS (select * from trans_student_id as TS where prereq2=TS.course_id and TS.grade>2.0)
+        RAISE EXCEPTION 'pre-requisite % not met by student',prereq2;
+        END IF;
+    IF prereq3<>'NULL' THEN
+        IF NOT EXISTS (select * from trans_student_id as TS where prereq3=TS.course_id and TS.grade>2.0)
+        RAISE EXCEPTION 'pre-requisite % not met by student',prereq3;
+        END IF;
+    END IF;
+    return NEW;
+END;
+$$;
+
+CREATE TRIGGER check_prerequisites
+BEFORE INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _check_prerequisites();
