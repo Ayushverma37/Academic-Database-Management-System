@@ -1,6 +1,6 @@
 -- Tables created
 --                List of relations
--- Schema |         Name         | Type  |  Owner   
+-- Schema |         Name         | Type  |  Owner
 ----------+----------------------+-------+----------
 -- public | course_catalog       | table | postgres
 -- public | course_offering      | table | postgres
@@ -69,7 +69,7 @@ CREATE TABLE Course_Offering (
     PRIMARY KEY(course_id, semester, year)
 );
 
--- different table for containing all timetable slots? 
+-- different table for containing all timetable slots?
 -- how to allot section to student ? -- create a procedure
 -- is section_id foreign in student registration ? -- yes
 
@@ -99,3 +99,30 @@ CREATE TABLE Student_Registration (
 
 -- TODO: create table for tickets
 -- Create templates for grades table
+
+-- Table for tickets
+-- doubt -- make a seperate table containing ticket id, course_id, semester, year or not ?
+-- make diiferent ticket tables for each instructor ????
+CREATE TABLE ticket_instructor (
+    student_id char(11) NOT NULL,
+    course_id char(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    PRIMARY KEY(student_id, course_id, semester, year)
+);
+
+CREATE TABLE ticket_advisor (
+    student_id char(11) NOT NULL,
+    course_id char(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    PRIMARY KEY(student_id, course_id, semester, year)
+);
+
+CREATE TABLE ticket_dean (
+    student_id char(11) NOT NULL,
+    course_id char(5) NOT NULL,
+    semester INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    PRIMARY KEY(student_id, course_id, semester, year)
+);
