@@ -11,15 +11,15 @@ new_course_timetable_slot varchar(10);
 old_course_timetable_slot varchar(10);
 student_registration_row record;
 BEGIN
-select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
-FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
-LOOP
-select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
-if new_course_timetable_slot = old_course_timetable_slot then
-  raise exception 'INSERTION FAILED: Course in timetable slot already exists';
-end if;
-END LOOP;
-RETURN NEW;
+    select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
+    FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
+    LOOP
+        select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
+        if new_course_timetable_slot = old_course_timetable_slot then
+            raise exception 'INSERTION FAILED: Course in timetable slot already exists';
+        end if;
+    END LOOP;
+    RETURN NEW;
 END;
 $$;
 
@@ -31,7 +31,7 @@ EXECUTE PROCEDURE check_course_in_timetable_slot();
 
 
 
-
+-- ***********************************************************
 
 
 
@@ -48,17 +48,17 @@ trans_student_row record;
 credit_of_previous NUMERIC;
 temp NUMERIC;
 BEGIN 
-for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP 
-if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
-select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
-credit_of_previous := credit_of_previous + temp;
-end if;
-if trans_student_row.semester = input_semester-2 AND trans_student_row.year = input_year THEN
-select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
-credit_of_previous := credit_of_previous + temp;
-end if;
-END LOOP;
-return credit_of_previous;
+    for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP 
+        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
+            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+            credit_of_previous := credit_of_previous + temp;
+        end if;
+        if trans_student_row.semester = input_semester-2 AND trans_student_row.year = input_year THEN
+            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+            credit_of_previous := credit_of_previous + temp;
+        end if;
+    END LOOP;
+    return credit_of_previous;
 END;
 $$;
 
@@ -72,10 +72,10 @@ registration_row record;
 credits_current NUMERIC;
 temp NUMERIC;
 BEGIN 
-for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
-select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
-credits_current := credits_current + temp;
-END LOOP;
+    for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
+        select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
+        credits_current := credits_current + temp;
+    END LOOP;
 return credits_current;
 END;
 $$;
@@ -97,14 +97,14 @@ max_credits_allowed numeric;
 credits_in_this_sem numeric;
 credits_for_new_course numeric;
 BEGIN
-credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
-max_credits_allowed := 1.25*credits_registered;
-credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
-select CO.c into credit_for_new_course from Course_Offering as CO where CO.course_id = NEW.course_id;
-if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
---ticket generation function call 
-raise exception 'Credit limit exceeded, ticket generated';
-end if;
+    credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
+    max_credits_allowed := 1.25*credits_registered;
+    credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
+    select CO.c into credit_for_new_course from Course_Offering as CO where CO.course_id = NEW.course_id;
+    if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
+        --ticket generation function call 
+        raise exception 'Credit limit exceeded, ticket generated';
+    end if;
 END;
 $$;
 
@@ -117,19 +117,31 @@ EXECUTE PROCEDURE check_credit_limit();
 
 
 
+-- **************************************************************************************
 
 
 
-
+-- update grade in student table when a new grade is entered in course_grade table
+CREATE OR REPLACE FUNCTION update_grade_in_trans_student(input_course_id char(11), input_semester INTEGER, input_year INTEGER)
+RETURNS TRIGGER 
+LANGUAGE PLPGSQL 
+AS $$
+BEGIN 
+    EXECUTE format('UPDATE %I as TS set TS.grade = %L where TS.course_id = %L and TS.semester = %L and TS.year = %L;', 'trans_'||NEW.student_id, NEW.grade, input_course_id, input_semester, input_year);
+    return NULL;
+END;
+$$; 
 
 -- tigger to create new table for every new entry into course offering
+-- as well as the corresponding trigger to update grade in trans_student table
 CREATE OR REPLACE FUNCTION create_course_grade_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
-RETURN NULL;
+    EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
+    EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year, 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year, NEW.course_id, NEW.semester, NEW.year);
+    RETURN NULL;
 END;
 $$;
 
@@ -141,7 +153,7 @@ EXECUTE PROCEDURE create_course_grade_table();
 
 
 
-
+-- *****************************************************************************************
 
 
 
@@ -151,8 +163,8 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
-EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade INTEGER NOT NULL);', 'trans_'||NEW.student_id );
-RETURN NULL;
+    EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade INTEGER NOT NULL);', 'trans_'||NEW.student_id );
+    RETURN NULL;
 END;
 $$;
 
@@ -165,11 +177,10 @@ EXECUTE PROCEDURE create_trans_student_table();
 
 
 
+-- ****************************************************************************************
 
 
 
-
---trigger and procedure to check if student meets the pre-requisites of the course before registering
 --trigger and procedure to check if student meets the pre-requisites of the course before registering
 create or replace function get_prereq (cid char(5), stud_id char(11))
 returns table (course char(5),grade INTEGER)
@@ -223,6 +234,12 @@ EXECUTE PROCEDURE _check_prerequisites();
 
 
 
+
+
+-- *********************************************************************************
+
+
+
 --trigger and procedure to check if student meets the cgpa criteria of the course before registering
 --procedure to be implemented : gradeOf(student_id) ____ done
 
@@ -232,8 +249,6 @@ LANGUAGE plpgsql AS $$
 begin
 return query EXECUTE format('select course_id, grade from %I as TS;', 'trans_'||stud_id);
 end; $$;
-
-
 
 CREATE OR REPLACE FUNCTION curr_cgpa(stud_id char(11))
 RETURNS numeric
@@ -287,6 +302,11 @@ EXECUTE PROCEDURE _check_cgpa();
 
 
 
+
+-- **************************************************************************************
+
+
+
 --trigger and procedure to check if the course max capacity has not been achieved
 --procedure to be implemented : maxCapacityOf(course_id) ____ done
 CREATE OR REPLACE FUNCTION maxCapacityOf(input_course_id char(5), input_semester INTEGER, input_year INTEGER)
@@ -327,5 +347,23 @@ EXECUTE PROCEDURE _check_capacity();
 
 
 
+-- *****************************************************************************************
 
+
+-- trigger on student registration so that whenever a new entry is created into student registration, a new entry is created in course grade table
+CREATE OR REPLACE FUNCTION _add_to_course_grade()
+RETURNS TRIGGER 
+LANGUAGE PLPGSQL 
+AS $$
+BEGIN 
+    EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||NEW.course_id||'_'||NEW.semester||'_'||NEW.year, NEW.student_id, NULL);
+    return NULL;
+END;
+$$;
+
+CREATE TRIGGER add_to_course_grade
+AFTER INSERT
+ON Student_Registration
+FOR EACH ROW
+EXECUTE PROCEDURE _add_to_course_grade();
 
