@@ -41,20 +41,20 @@ EXECUTE PROCEDURE check_course_in_timetable_slot();
 -- modify if previous semester are in different year than current one
 CREATE OR REPLACE FUNCTION get_registered_credits_previous_2_semester(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
 RETURNS NUMERIC
-LANGUAGE PLPGSQL 
+LANGUAGE PLPGSQL
 AS $$
 DECLARE
 trans_student_row record;
 credit_of_previous NUMERIC;
 temp NUMERIC;
-BEGIN 
-    for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP 
+BEGIN
+    for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP
         if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
-            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
         if trans_student_row.semester = input_semester-2 AND trans_student_row.year = input_year THEN
-            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id; 
+            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
     END LOOP;
@@ -64,23 +64,23 @@ $$;
 
 -- procedure to get credits registered in this semester
 CREATE OR REPLACE FUNCTION get_credits_registered_in_this_sem(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
-RETURNS NUMERIC 
-LANGUAGE PLPGSQL 
+RETURNS NUMERIC
+LANGUAGE PLPGSQL
 AS $$
 DECLARE
 registration_row record;
 credits_current NUMERIC;
 temp NUMERIC;
-BEGIN 
+BEGIN
     for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
         select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
         credits_current := credits_current + temp;
     END LOOP;
-return credits_current;
+    return credits_current;
 END;
 $$;
 
---implement procedure for ticket generation 
+--implement procedure for ticket generation
 
 -- trigger and stored procedure to check for credit limit of 1.25
 -- procedures to be implemented:
@@ -102,16 +102,17 @@ BEGIN
     credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
     select CO.c into credit_for_new_course from Course_Offering as CO where CO.course_id = NEW.course_id;
     if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
-        --ticket generation function call 
+        --ticket generation function call
         raise exception 'Credit limit exceeded, ticket generated';
     end if;
+    return NEW;
 END;
 $$;
 
 CREATE TRIGGER credit_limit_trigger
 Before INSERT
 ON Student_Registration
-FOR EACH ROW 
+FOR EACH ROW
 EXECUTE PROCEDURE check_credit_limit();
 
 
@@ -123,14 +124,14 @@ EXECUTE PROCEDURE check_credit_limit();
 
 -- update grade in student table when a new grade is entered in course_grade table
 CREATE OR REPLACE FUNCTION update_grade_in_trans_student(input_course_id char(11), input_semester INTEGER, input_year INTEGER)
-RETURNS TRIGGER 
-LANGUAGE PLPGSQL 
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
 AS $$
-BEGIN 
+BEGIN
     EXECUTE format('UPDATE %I as TS set TS.grade = %L where TS.course_id = %L and TS.semester = %L and TS.year = %L;', 'trans_'||NEW.student_id, NEW.grade, input_course_id, input_semester, input_year);
     return NULL;
 END;
-$$; 
+$$;
 
 -- tigger to create new table for every new entry into course offering
 -- as well as the corresponding trigger to update grade in trans_student table
@@ -230,7 +231,7 @@ CREATE TRIGGER check_prerequisites
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_prerequisites(); 
+EXECUTE PROCEDURE _check_prerequisites();
 
 
 
@@ -288,7 +289,7 @@ BEGIN
     curr_grade:=curr_cgpa(NEW.student_id);
     select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
     IF curr_grade<cgpaReq THEN
-    RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
+      RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
     END IF;
     return NEW;
 END;
@@ -318,7 +319,7 @@ cap INTEGER:=0;
 registration_row record;
 BEGIN
     select count(*) into cap from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year;
-    return cap; 
+    return cap;
 END;
 $$;
 
@@ -333,7 +334,7 @@ BEGIN
     currentCapacity:=maxCapacityOf(NEW.course_id,NEW.semester, NEW.year);
     select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
     IF currentCapacity>=courseCapacity THEN
-    RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
+      RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
     END IF;
     return NEW;
 END;
@@ -352,10 +353,10 @@ EXECUTE PROCEDURE _check_capacity();
 
 -- trigger on student registration so that whenever a new entry is created into student registration, a new entry is created in course grade table
 CREATE OR REPLACE FUNCTION _add_to_course_grade()
-RETURNS TRIGGER 
-LANGUAGE PLPGSQL 
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
 AS $$
-BEGIN 
+BEGIN
     EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||NEW.course_id||'_'||NEW.semester||'_'||NEW.year, NEW.student_id, NULL);
     return NULL;
 END;
@@ -366,4 +367,3 @@ AFTER INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _add_to_course_grade();
-
