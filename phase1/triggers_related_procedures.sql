@@ -10,11 +10,17 @@ DECLARE
 new_course_timetable_slot varchar(10);
 old_course_timetable_slot varchar(10);
 student_registration_row record;
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
-    FOR student_registration_row in EXECUTE format('select * from %I as SR where SR.student_id = NEW.student_id', 'student_registration'||'_'||NEW.semester||'_'||NEW.year) 
-    LOOP
-        select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    -- select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
+    EXECUTE format('select timetable_slot into %I from %I as CO where CO.course_id = %L;', new_course_timetable_slot, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    -- FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
+    FOR student_registration in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, NEW.student_id) LOOP
+        -- select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
+        EXECUTE format('select timetable_slot into old_course_timetable_slot from %I as CO where CO.course_id = %L;','course_offering_'||temp_semester||'_'||temp_year, student_registration_row.course_id);
         if new_course_timetable_slot = old_course_timetable_slot then
             raise exception 'INSERTION FAILED: Course in timetable slot already exists';
         end if;
@@ -23,12 +29,11 @@ BEGIN
 END;
 $$;
 
-EXECUTE format('CREATE TRIGGER course_in_timetable_slot
+/*CREATE TRIGGER course_in_timetable_slot
 Before INSERT
-ON %I
+ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE check_course_in_timetable_slot();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+EXECUTE PROCEDURE check_course_in_timetable_slot();*/
 
 
 
@@ -72,9 +77,13 @@ DECLARE
 registration_row record;
 credits_current NUMERIC;
 temp NUMERIC;
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    for registration_row in EXECUTE format('select * from %I as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year', 'student_registration'||'_'||NEW.semester||'_'||NEW.year) 
-     LOOP
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    --for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
+    for registration_row in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_student_id, input_semester, input_year) LOOP
         select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
         credits_current := credits_current + temp;
     END LOOP;
@@ -102,7 +111,7 @@ BEGIN
     credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
-    select CO.c into credit_for_new_course from Course_Offering as CO where CO.course_id = NEW.course_id;
+    select CO.c into credit_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
     if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
         --ticket generation function call
         raise exception 'Credit limit exceeded, ticket generated';
@@ -111,12 +120,11 @@ BEGIN
 END;
 $$;
 
-EXECUTE format('CREATE TRIGGER credit_limit_trigger
+/*CREATE TRIGGER credit_limit_trigger
 Before INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+EXECUTE PROCEDURE check_credit_limit();*/
 
 
 
@@ -149,11 +157,11 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER course_grade_table
+/*CREATE TRIGGER course_grade_table
 AFTER INSERT
 ON Course_Offering
 FOR EACH ROW
-EXECUTE PROCEDURE create_course_grade_table();
+EXECUTE PROCEDURE create_course_grade_table();*/
 
 
 
@@ -230,11 +238,11 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER check_prerequisites
+/*CREATE TRIGGER check_prerequisites
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_prerequisites();
+EXECUTE PROCEDURE _check_prerequisites();*/
 
 
 
@@ -288,9 +296,14 @@ AS $$
 DECLARE
 curr_grade numeric;
 cgpaReq numeric;
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
     curr_grade:=curr_cgpa(NEW.student_id);
-    select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    -- select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
+    EXECUTE format ('select cgpa_criterion into %I from %I as CO where CO.course_id=%L;', cgpaReq, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
     IF curr_grade<cgpaReq THEN
       RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
     END IF;
@@ -298,13 +311,11 @@ BEGIN
 END;
 $$;
 
-
-EXECUTE format('CREATE TRIGGER check_cgpa
+/*CREATE TRIGGER check_cgpa
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_cgpa();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+EXECUTE PROCEDURE _check_cgpa();*/
 
 
 
@@ -315,15 +326,20 @@ EXECUTE PROCEDURE _check_cgpa();', 'student_registration'||'_'||NEW.semester||'_
 
 --trigger and procedure to check if the course max capacity has not been achieved
 --procedure to be implemented : maxCapacityOf(course_id) ____ done
-CREATE OR REPLACE FUNCTION maxCapacityOf(input_course_id char(5), input_semester INTEGER, input_year INTEGER)
+CREATE OR REPLACE FUNCTION maxCapacityOf(input_course_id char(5))
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
 cap INTEGER:=0;
 registration_row record;
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    select count(*) into cap from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year;
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    -- select count(*) into cap from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year;
+    EXECUTE format('select count(*) into cap from %I as SR where SR.course_id= %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_course_id);
     return cap;
 END;
 $$;
@@ -336,7 +352,7 @@ DECLARE
 courseCapacity integer;
 currentCapacity integer;
 BEGIN
-    currentCapacity:=maxCapacityOf(NEW.course_id,NEW.semester, NEW.year);
+    currentCapacity:=maxCapacityOf(NEW.course_id);
     select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
     IF currentCapacity>=courseCapacity THEN
       RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
@@ -345,12 +361,11 @@ BEGIN
 END;
 $$;
 
-EXECUTE format('CREATE TRIGGER check_capacity
+/*CREATE TRIGGER check_capacity
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_capacity();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+EXECUTE PROCEDURE _check_capacity();*/
 
 
 
@@ -368,12 +383,11 @@ BEGIN
 END;
 $$;
 
-EXECUTE format('CREATE TRIGGER add_to_course_grade
+/*CREATE TRIGGER add_to_course_grade
 AFTER INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _add_to_course_grade();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+EXECUTE PROCEDURE _add_to_course_grade();*/
 
 
 -- *********************************************************************************************
@@ -416,7 +430,53 @@ BEGIN
         FOREIGN KEY(course_id, section_id) REFERENCES %I(course_id, section_id),
         PRIMARY KEY(student_id, course_id)
     );', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'section'||'_'||NEW.semester||'_'||NEW.year);
+
+    -- triggers on student registration
+    -- trigger for timetable_slot checking
+    EXECUTE format('CREATE TRIGGER course_in_timetable_slot
+    Before INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_course_in_timetable_slot();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    -- trigger for credit limit
+    EXECUTE format('CREATE TRIGGER credit_limit_trigger
+    Before INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     return NULL;
+    -- trigger for pre-requisites
+    EXECUTE format('CREATE TRIGGER check_prerequisites
+    BEFORE INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_prerequisites();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    -- trigger for cgpa checking
+    EXECUTE format('CREATE TRIGGER check_cgpa
+    BEFORE INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_cgpa();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    -- trigger for checking capacity
+    EXECUTE format('CREATE TRIGGER check_capacity
+    BEFORE INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_capacity();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    -- trigger so that whenever a student registers, a new entry is created in course grade table
+    EXECUTE format('CREATE TRIGGER add_to_course_grade
+    AFTER INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _add_to_course_grade();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
+    -- triggers on course_offerings
+    -- trigger to make course grade table
+    EXECUTE format('CREATE TRIGGER course_grade_table
+    AFTER INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE create_course_grade_table();', 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
 END;
 $$;
 
