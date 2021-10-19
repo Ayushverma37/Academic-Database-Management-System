@@ -12,7 +12,7 @@ old_course_timetable_slot varchar(10);
 student_registration_row record;
 BEGIN
     select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
-    FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
+    FOR student_registration_row in EXECUTE format('select * from %I as SR where SR.student_id = NEW.student_id', 'student_registration'||'_'||NEW.semester||'_'||NEW.year) 
     LOOP
         select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
         if new_course_timetable_slot = old_course_timetable_slot then
@@ -23,11 +23,12 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER course_in_timetable_slot
+EXECUTE format('CREATE TRIGGER course_in_timetable_slot
 Before INSERT
-ON Student_Registration
+ON %I
 FOR EACH ROW
-EXECUTE PROCEDURE check_course_in_timetable_slot();
+EXECUTE PROCEDURE check_course_in_timetable_slot();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
 
 
 
@@ -72,7 +73,8 @@ registration_row record;
 credits_current NUMERIC;
 temp NUMERIC;
 BEGIN
-    for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
+    for registration_row in EXECUTE format('select * from %I as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year', 'student_registration'||'_'||NEW.semester||'_'||NEW.year) 
+     LOOP
         select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
         credits_current := credits_current + temp;
     END LOOP;
@@ -109,11 +111,12 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER credit_limit_trigger
+EXECUTE format('CREATE TRIGGER credit_limit_trigger
 Before INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE check_credit_limit();
+EXECUTE PROCEDURE check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
 
 
 
@@ -295,11 +298,13 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER check_cgpa
+
+EXECUTE format('CREATE TRIGGER check_cgpa
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_cgpa();
+EXECUTE PROCEDURE _check_cgpa();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
 
 
 
@@ -340,11 +345,12 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER check_capacity
+EXECUTE format('CREATE TRIGGER check_capacity
 BEFORE INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _check_capacity();
+EXECUTE PROCEDURE _check_capacity();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
 
 
 
@@ -362,11 +368,12 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER add_to_course_grade
+EXECUTE format('CREATE TRIGGER add_to_course_grade
 AFTER INSERT
 ON Student_Registration
 FOR EACH ROW
-EXECUTE PROCEDURE _add_to_course_grade();
+EXECUTE PROCEDURE _add_to_course_grade();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+
 
 
 -- *********************************************************************************************
