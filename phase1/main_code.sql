@@ -12,6 +12,12 @@
 --(7 rows)
 
 
+-- Table for current_sem and year
+CREATE TABLE curreny_sem_and_year(
+      semester INTEGER NOT NULL,
+      year INTEGER NOT NULL,
+      PRIMARY KEY(semester, year)
+);
 
 -- Table of all instructors for an institute
 CREATE TABLE Instructor(
@@ -50,7 +56,7 @@ CREATE TABLE Timetable_slot_list(
 -- Table for course offering, course_id, semester, year are primary keys
 -- should timetable slot be primary key as well ? -- No
 -- should ins_id be primary key as well ? -- No
-CREATE TABLE Course_Offering (
+/*CREATE TABLE Course_Offering (
     course_id CHAR(5) NOT NULL,
     semester INTEGER NOT NULL,
     year INTEGER NOT NULL,
@@ -67,14 +73,14 @@ CREATE TABLE Course_Offering (
     FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id),
     FOREIGN KEY(timetable_slot) REFERENCES Timetable_slot_list(timetable_slot),
     PRIMARY KEY(course_id, semester, year)
-);
+);*/
 
 -- different table for containing all timetable slots?
 -- how to allot section to student ? -- create a procedure
 -- is section_id foreign in student registration ? -- yes
 
 -- Table for sections
-CREATE TABLE Section(
+/*CREATE TABLE Section(
     section_id INTEGER NOT NULL,
     course_id CHAR(5) NOT NULL,
     semester INTEGER NOT NULL,
@@ -82,11 +88,11 @@ CREATE TABLE Section(
     classroom char(5) NOT NULL,
     PRIMARY KEY(section_id, course_id, semester, year),
     FOREIGN KEY(course_id, semester, year) REFERENCES Course_Offering(course_id, semester, year)
-);
+);*/
 
 -- Table for student registration relationship, is section_id required to be a primary key ? -- assumed no
 -- because each student can be in only one section of a particular course
-CREATE TABLE Student_Registration (
+/*CREATE TABLE Student_Registration (
     student_id char(11),
     course_id char(5) NOT NULL,
     semester INTEGER NOT NULL,
@@ -95,7 +101,7 @@ CREATE TABLE Student_Registration (
     FOREIGN KEY(student_id) REFERENCES Student(student_id),
     FOREIGN KEY(course_id, semester, year, section_id) REFERENCES Section(course_id, semester, year, section_id),
     PRIMARY KEY(student_id, course_id, semester, year)
-);
+);*/
 
 -- TODO: create table for tickets
 -- Create templates for grades table

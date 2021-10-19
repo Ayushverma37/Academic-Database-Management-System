@@ -367,3 +367,54 @@ AFTER INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _add_to_course_grade();
+
+
+-- *********************************************************************************************
+
+
+
+-- trigger to create new student registration and course_offering table when update happens in current_sem_and_year table
+CREATE OR REPLACE FUNCTION _create_course_offering_student_registration()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+BEGIN
+    EXECUTE format('CREATE TABLE %I (
+        course_id CHAR(5) NOT NULL PRIMARY KEY,
+        ins_id INTEGER NOT NULL,
+        cgpa_criterion numeric NOT NULL,
+        maxCapacity INTEGER NOT NULL,
+        course_id_Not_Elligible char(5) NOT NULL ,
+        timetable_slot varchar(10) NOT NULL,
+        branch1 char(5),
+        branch2 char(5),
+        branch3 char(5),
+        FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
+        FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
+        FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id),
+        FOREIGN KEY(timetable_slot) REFERENCES Timetable_slot_list(timetable_slot)
+    );', 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE format('CREATE TABLE %I(
+        section_id INTEGER NOT NULL,
+        course_id CHAR(5) NOT NULL,
+        classroom char(5) NOT NULL,
+        PRIMARY KEY(section_id, course_id),
+        FOREIGN KEY(course_id) REFERENCES %I(course_id)
+    );', 'section'||'_'||NEW.semester||'_'||NEW.year, 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE format('CREATE TABLE %I (
+        student_id char(11),
+        course_id char(5) NOT NULL,
+        section_id INTEGER NOT NULL,
+        FOREIGN KEY(student_id) REFERENCES Student(student_id),
+        FOREIGN KEY(course_id, section_id) REFERENCES %I(course_id, section_id),
+        PRIMARY KEY(student_id, course_id)
+    );', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'section'||'_'||NEW.semester||'_'||NEW.year);
+    return NULL;
+END;
+$$;
+
+CREATE TRIGGER create_course_offering_student_registration
+AFTER UPDATE
+ON current_sem_and_year
+FOR EACH ROW
+EXECUTE PROCEDURE _create_course_offering_student_registration();
