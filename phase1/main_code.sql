@@ -13,7 +13,7 @@
 
 
 -- Table for current_sem and year
-CREATE TABLE curreny_sem_and_year(
+CREATE TABLE current_sem_and_year(
       semester INTEGER NOT NULL,
       year INTEGER NOT NULL,
       PRIMARY KEY(semester, year)
