@@ -69,7 +69,7 @@ END;
 $$;
 
 -- procedure to get credits registered in this semester
-CREATE OR REPLACE FUNCTION get_credits_registered_in_this_sem(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
+CREATE OR REPLACE FUNCTION get_credits_registered_in_this_sem(input_student_id char(11))
 RETURNS NUMERIC
 LANGUAGE PLPGSQL
 AS $$
@@ -83,7 +83,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     --for registration_row in select * from Student_Registration as SR where SR.student_id = input_student_id AND SR.semester = input_semester AND SR.year = input_year LOOP
-    for registration_row in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_student_id, input_semester, input_year) LOOP
+    for registration_row in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_student_id) LOOP
         select C into temp from Course_Catalog as CC where CC.course_id = registration_row.course_id;
         credits_current := credits_current + temp;
     END LOOP;
@@ -110,7 +110,7 @@ credits_for_new_course numeric;
 BEGIN
     credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
     max_credits_allowed := 1.25*credits_registered;
-    credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id, NEW.semester, NEW.year);
+    credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
     select CO.c into credit_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
     if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
         --ticket generation function call
@@ -150,9 +150,14 @@ CREATE OR REPLACE FUNCTION create_course_grade_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
+DECLARE 
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year);
-    EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year, 'grade_' || NEW.course_id::text || '_' || NEW.semester || '_' || NEW.year, NEW.course_id, NEW.semester, NEW.year);
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
+    EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id || '_' || temp_semester || '_' || temp_year, 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.course_id, temp_semester, temp_year);
     RETURN NULL;
 END;
 $$;
@@ -377,8 +382,13 @@ CREATE OR REPLACE FUNCTION _add_to_course_grade()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
+DECLARE 
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||NEW.course_id||'_'||NEW.semester||'_'||NEW.year, NEW.student_id, NULL);
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||NEW.course_id||'_'||temp_semester||'_'||temp_year, NEW.student_id, NULL);
     return NULL;
 END;
 $$;
