@@ -132,9 +132,9 @@ EXECUTE PROCEDURE check_credit_limit();*/
 -- **************************************************************************************
 
 
-
+-- dean will run a procedure to update grade
 -- update grade in student table when a new grade is entered in course_grade table
-CREATE OR REPLACE FUNCTION update_grade_in_trans_student(input_course_id char(11), input_semester INTEGER, input_year INTEGER)
+/*CREATE OR REPLACE FUNCTION update_grade_in_trans_student(input_course_id char(11), input_semester INTEGER, input_year INTEGER)
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
@@ -145,7 +145,7 @@ END;
 $$;
 
 -- Trigger created when making table 
-
+*/
 
 -- *************************************************************************************************
 
@@ -162,7 +162,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
-    EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id || '_' || temp_semester || '_' || temp_year, 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.course_id, temp_semester, temp_year);
+    --EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id || '_' || temp_semester || '_' || temp_year, 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.course_id, temp_semester, temp_year);
     return NULL;
 END;
 $$;
@@ -354,6 +354,7 @@ BEGIN
 END;
 $$;
 
+-- update course offering
 CREATE OR REPLACE FUNCTION _check_capacity()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
@@ -361,9 +362,14 @@ AS $$
 DECLARE
 courseCapacity integer;
 currentCapacity integer;
+temp_semester integer;
+temp_year integer;
 BEGIN
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
     currentCapacity:=maxCapacityOf(NEW.course_id);
-    select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
+    -- select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
+    EXECUTE format('select maxCapacity into %I from %I as CO where CO.course_id=%L;', courseCapacity, 'course_offering_'||temp_semester||'_'||temp_year,NEW.course_id);
     IF currentCapacity>=courseCapacity THEN
       RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
     END IF;
@@ -383,6 +389,9 @@ EXECUTE PROCEDURE _check_capacity();*/
 
 
 -- trigger on student registration so that whenever a new entry is created into student registration, a new entry is created in course grade table
+-- *****************************
+-- TODO: create procedure for this -- instructor will call this procedure to get all registered students  
+-- *****************************
 CREATE OR REPLACE FUNCTION _add_to_course_grade()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
