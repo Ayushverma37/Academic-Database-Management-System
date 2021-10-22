@@ -36,6 +36,15 @@ CREATE TABLE Student(
       batch INTEGER NOT NULL
 );
 
+-- Table for all batch advisors
+CREATE TABLE batch_adviser (
+    dept_name VARCHAR(10) NOT NULL,
+    batch INTEGER NOT NULL,
+    ins_id INTEGER NOT NULL,
+    FOREIGN KEY (ins_id) REFERENCES Instructor(ins_id),
+    PRIMARY KEY(dept_name, batch) 
+);
+
 -- Table of course catalog, contains 3 pre-requisites also
 CREATE TABLE Course_Catalog (
     course_id char(5) primary key,
@@ -103,6 +112,7 @@ CREATE TABLE Timetable_slot_list(
     FOREIGN KEY(course_id, semester, year, section_id) REFERENCES Section(course_id, semester, year, section_id),
     PRIMARY KEY(student_id, course_id, semester, year)
 );*/
+
 
 -- TODO: create table for tickets
 -- Create templates for grades table
