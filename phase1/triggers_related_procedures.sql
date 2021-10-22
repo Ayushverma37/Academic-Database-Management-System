@@ -18,7 +18,7 @@ BEGIN
     -- select timetable_slot into new_course_timetable_slot from Course_Offering as CO where NEW.course_id = CO.course_id;
     EXECUTE format('select timetable_slot into %I from %I as CO where CO.course_id = %L;', new_course_timetable_slot, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
     -- FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
-    FOR student_registration in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, NEW.student_id) LOOP
+    FOR student_registration_row in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, NEW.student_id) LOOP
         -- select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
         EXECUTE format('select timetable_slot into old_course_timetable_slot from %I as CO where CO.course_id = %L;','course_offering_'||temp_semester||'_'||temp_year, student_registration_row.course_id);
         if new_course_timetable_slot = old_course_timetable_slot then
@@ -111,7 +111,7 @@ BEGIN
     credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
-    select CO.c into credit_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
+    select CO.c into credits_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
     if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
         --ticket generation function call
         raise exception 'Credit limit exceeded, ticket generated';
@@ -144,6 +144,11 @@ BEGIN
 END;
 $$;
 
+-- Trigger created when making table 
+
+
+-- *************************************************************************************************
+
 -- tigger to create new table for every new entry into course offering
 -- as well as the corresponding trigger to update grade in trans_student table
 CREATE OR REPLACE FUNCTION create_course_grade_table()
@@ -158,7 +163,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
     EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id || '_' || temp_semester || '_' || temp_year, 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.course_id, temp_semester, temp_year);
-    RETURN NULL;
+    return NULL;
 END;
 $$;
 
@@ -454,7 +459,6 @@ BEGIN
     ON %I
     FOR EACH ROW
     EXECUTE PROCEDURE check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-    return NULL;
     -- trigger for pre-requisites
     EXECUTE format('CREATE TRIGGER check_prerequisites
     BEFORE INSERT
@@ -487,6 +491,7 @@ BEGIN
     ON %I
     FOR EACH ROW
     EXECUTE PROCEDURE create_course_grade_table();', 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
+    return NULL;
 END;
 $$;
 
