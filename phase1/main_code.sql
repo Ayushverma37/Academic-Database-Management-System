@@ -32,7 +32,8 @@ CREATE TABLE Student(
       student_id char(11) NOT NULL PRIMARY KEY,
       first_name VARCHAR(10) NOT NULL,
       last_name VARCHAR(10) NOT NULL,
-      dept_name VARCHAR(10) NOT NULL
+      dept_name VARCHAR(10) NOT NULL,
+      batch INTEGER NOT NULL
 );
 
 -- Table of course catalog, contains 3 pre-requisites also
