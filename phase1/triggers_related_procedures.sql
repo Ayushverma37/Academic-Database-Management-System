@@ -254,7 +254,37 @@ ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE _check_prerequisites();*/
 
+--******************************************************************************
+--Trigger to check for branches and year at the time of student registration.
+CREATE OR REPLACE FUNCTION _check_batchAndYear()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+depart1 char(5);
+depart2 char(5);
+depart3 char(5);
+yr1 INTEGER;
+yr2 INTEGER;
+yr3 INTEGER;
+temp_semester INTEGER;
+temp_year INTEGER;
+stud_dept char(5);
+stud_year INTEGER;
 
+BEGIN
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    select dept_name into stud_dept from Student where NEW.student_id=Student.student_id;
+    select batch into stud_year from Student where NEW.student_id=Student.student_id;
+    EXECUTE format('select dept1, dept2, dept3, year1, year2, year3 into depart1, depart2, depart3, yr1, yr2, yr3 from %I as CO where CO.course_id=%L','course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    IF (((stud_dept<>depart1) AND (stud_dept<>depart2) AND (stud_dept<>depart3)) OR ((stud_year<>yr1) AND (stud_year<>yr2) AND (stud_year<>yr3))) THEN
+        RAISE EXCEPTION 'Course not floated for this branch and year';
+    END IF;
+    return NEW;
+END;
+$$;
+--*********************************************************************************
 
 
 
@@ -494,6 +524,12 @@ BEGIN
     ON %I
     FOR EACH ROW
     EXECUTE PROCEDURE _check_prerequisites();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    -- trigger for branchAndYear
+    EXECUTE format('CREATE TRIGGER check_batchAndYear
+    BEFORE INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_batchAndYear();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for cgpa checking
     EXECUTE format('CREATE TRIGGER check_cgpa
     BEFORE INSERT
