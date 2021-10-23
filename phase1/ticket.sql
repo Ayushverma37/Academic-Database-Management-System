@@ -60,7 +60,7 @@ $$;
 
 CREATE TRIGGER ticket_batch_adviser
 AFTER INSERT 
-ON Instructor 
+ON batch_adviser
 FOR EACH ROW 
 EXECUTE PROCEDURE create_batch_adviser_ticket();
 
