@@ -277,7 +277,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     select dept_name into stud_dept from Student where NEW.student_id=Student.student_id;
     select batch into stud_year from Student where NEW.student_id=Student.student_id;
-    EXECUTE format('select dept1, dept2, dept3, year1, year2, year3 into depart1, depart2, depart3, yr1, yr2, yr3 from %I as CO where CO.course_id=%L','course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    EXECUTE format('select dept1, dept2, dept3, year1, year2, year3 into %I, %I, %I, %I, %I, %I from %I as CO where CO.course_id=%L',depart1, depart2, depart3, yr1, yr2, yr3, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
     IF (((stud_dept<>depart1) AND (stud_dept<>depart2) AND (stud_dept<>depart3)) OR ((stud_year<>yr1) AND (stud_year<>yr2) AND (stud_year<>yr3))) THEN
         RAISE EXCEPTION 'Course not floated for this branch and year';
     END IF;
