@@ -50,3 +50,24 @@ BEGIN
     EXECUTE format('INSERT INTO Timetable_slot_list values(%L);', timetable_slot);
 END;
 $$;
+
+-- Procedure for updating grades in trans student table when grades are uploaded by instructor in course grade table
+CREATE OR REPLACE FUNCTION update_grade_in_trans(input_course_id char(5))
+RETURNS NULL
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+temp_semester INTEGER;
+temp_year INTEGER;
+curr_student_id char(11);
+grade_row record;
+BEGIN
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    FOR grade_row in EXECUTE format('select * from %I', 'grade_'||input_course_id||'_'||temp_semester||'_'||temp_year) LOOP
+        if grade_row.grade<>NULL THEN
+            EXECUTE format('INSERT INTO %I VALUES(%L, %L, %L, %L)', 'trans_'||grade_row.student_id, input_course_id, temp_semester, temp_year, grade_row.grade);
+        end if;
+    END LOOP;
+END;
+$$;
