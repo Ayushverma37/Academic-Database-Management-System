@@ -65,7 +65,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE create_batch_adviser_ticket();
 
 -- table of dean tickets
-CREATE TABLE tickets_dean (course_id char(5) NOT NULL, accepted char(3));
+CREATE TABLE tickets_dean (student_id char(11) NOT NULL, course_id char(5) NOT NULL, accepted_by_instructor char(3), accepted_by_batch_adviser char(3), final_decision char(3));
 
 -- STEP2: filling instructor tickets table
 
