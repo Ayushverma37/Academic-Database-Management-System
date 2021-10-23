@@ -498,7 +498,7 @@ BEGIN
         course_id CHAR(5) NOT NULL,
         ins_id INTEGER NOT NULL,
         classroom char(5) NOT NULL,
-        PRIMARY KEY(section_id, course_id),
+        PRIMARY KEY(section_id, course_id, ins_id),
         FOREIGN KEY(course_id) REFERENCES %I(course_id),
         FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id)
     );', 'section'||'_'||NEW.semester||'_'||NEW.year, 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
