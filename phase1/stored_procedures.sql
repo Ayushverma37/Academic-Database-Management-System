@@ -16,7 +16,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION offering_course(course_id char(5), ins_id1 INTEGER, ins_id2 INTEGER, ins_id3 INTEGER, cgpa_criterion numeric, maxCapacity INTEGER, course_id_Not_Elligible char(5), timetable_slot varchar(10), branch1 char(5), branch2 char(5), branch3 char(5))
+CREATE OR REPLACE FUNCTION offering_course(course_id char(5), ins_id INTEGER, ins_id2 INTEGER, ins_id3 INTEGER, cgpa_criterion numeric, maxCapacity INTEGER, course_id_Not_Elligible char(5), timetable_slot varchar(10), dept1 char(5), dept2 char(5), dept3 char(5), year1 INTEGER, year2 INTEGER, year3 INTEGER)
 RETURNS NULL
 LANGUAGE PLPGSQL
 AS $$
@@ -26,7 +26,7 @@ temp_year INTEGER;
 BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
-    EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L, %L);', 'course_offering_'||temp_semester||'_'||temp_year, course_id, ins_id1, ins_id2, ins_id3, cgpa_criterion, maxCapacity, course_id_Not_Elligible, timetable_slot, branch1, branch2, branch3);
+    EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);', 'course_offering_'||temp_semester||'_'||temp_year, course_id, ins_id, ins_id2, ins_id3, cgpa_criterion, maxCapacity, course_id_Not_Elligible, timetable_slot, dept1, dept2, dept3, year1, year2, year3);
 END;
 $$;
 

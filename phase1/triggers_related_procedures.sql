@@ -474,6 +474,8 @@ BEGIN
     EXECUTE format('CREATE TABLE %I (
         course_id CHAR(5) NOT NULL PRIMARY KEY,
         ins_id INTEGER NOT NULL,
+        ins_id2 INTEGER NOT NULL,
+        ins_id3 INTEGER NOT NULL,
         cgpa_criterion numeric NOT NULL,
         maxCapacity INTEGER NOT NULL,
         course_id_Not_Elligible char(5) NOT NULL ,
@@ -487,14 +489,18 @@ BEGIN
         FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
         FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
         FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id),
+        FOREIGN KEY(ins_id2) REFERENCES Instructor(ins_id),
+        FOREIGN KEY(ins_id3) REFERENCES Instructor(ins_id),
         FOREIGN KEY(timetable_slot) REFERENCES Timetable_slot_list(timetable_slot)
     );', 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
     EXECUTE format('CREATE TABLE %I(
         section_id INTEGER NOT NULL,
         course_id CHAR(5) NOT NULL,
+        ins_id INTEGER NOT NULL,
         classroom char(5) NOT NULL,
         PRIMARY KEY(section_id, course_id),
-        FOREIGN KEY(course_id) REFERENCES %I(course_id)
+        FOREIGN KEY(course_id) REFERENCES %I(course_id),
+        FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id)
     );', 'section'||'_'||NEW.semester||'_'||NEW.year, 'course_offering'||'_'||NEW.semester||'_'||NEW.year);
     EXECUTE format('CREATE TABLE %I (
         student_id char(11),
