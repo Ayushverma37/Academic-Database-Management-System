@@ -449,7 +449,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     for registration_row in EXECUTE format('select * from %I as SR where SR.course_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year,input_course_id) LOOP
-        EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||input_course_id.course_id||'_'||temp_semester||'_'||temp_year, registration_row.student_id, NULL);
+        EXECUTE format('INSERT INTO %I values(%L, %L);', 'grade_'||input_course_id||'_'||temp_semester||'_'||temp_year, registration_row.student_id, NULL);
     END LOOP;
 END;
 $$;
