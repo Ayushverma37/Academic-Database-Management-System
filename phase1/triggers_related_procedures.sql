@@ -55,7 +55,7 @@ credit_of_previous NUMERIC;
 temp NUMERIC;
 BEGIN
     for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP
-        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
+        if trans_student_row.semester = input_semester AND trans_student_row.year = input_year THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
