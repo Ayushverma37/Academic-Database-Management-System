@@ -549,12 +549,12 @@ BEGIN
     FOR EACH ROW
     EXECUTE PROCEDURE _check_capacity();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger so that whenever a student registers, a new entry is created in course grade table
-    EXECUTE format('CREATE TRIGGER add_to_course_grade
+    /*EXECUTE format('CREATE TRIGGER add_to_course_grade
     AFTER INSERT
     ON %I
     FOR EACH ROW
     EXECUTE PROCEDURE _add_to_course_grade();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
-
+    */
     -- triggers on course_offerings
     -- trigger to make course grade table
     EXECUTE format('CREATE TRIGGER course_grade_table
