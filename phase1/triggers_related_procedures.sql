@@ -20,7 +20,7 @@ BEGIN
     -- FOR student_registration_row in select * from Student_Registration as SR where SR.student_id = NEW.student_id
     FOR student_registration_row in EXECUTE format('select * from %I as SR where SR.student_id = %L;', 'student_registration_'||temp_semester||'_'||temp_year, NEW.student_id) LOOP
         -- select timetable_slot into old_course_timetable_slot from Course_Offering as CO where student_registration_row.course_id = CO.course_id;
-        EXECUTE format('select timetable_slot into old_course_timetable_slot from %I as CO where CO.course_id = %L;','course_offering_'||temp_semester||'_'||temp_year, student_registration_row.course_id);
+        EXECUTE format('select timetable_slot into %I from %I as CO where CO.course_id = %L;',old_course_timetable_slot, 'course_offering_'||temp_semester||'_'||temp_year, student_registration_row.course_id);
         if new_course_timetable_slot = old_course_timetable_slot then
             raise exception 'INSERTION FAILED: Course in timetable slot already exists';
         end if;
