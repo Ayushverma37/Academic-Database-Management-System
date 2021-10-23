@@ -120,7 +120,7 @@ CREATE TABLE Timetable_slot_list(
 -- Table for tickets
 -- doubt -- make a seperate table containing ticket id, course_id, semester, year or not ?
 -- make diiferent ticket tables for each instructor ????
-CREATE TABLE ticket_instructor (
+/*CREATE TABLE ticket_instructor (
     student_id char(11) NOT NULL,
     course_id char(5) NOT NULL,
     semester INTEGER NOT NULL,
@@ -142,4 +142,4 @@ CREATE TABLE ticket_dean (
     semester INTEGER NOT NULL,
     year INTEGER NOT NULL,
     PRIMARY KEY(student_id, course_id, semester, year)
-);
+);*/
