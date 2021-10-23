@@ -53,7 +53,7 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL 
 AS $$ 
 BEGIN
-    EXECUTE format('CREATE TABLE %I (student_id char(5) NOT NULL, accepted char(3));', 'ticket_batch_adviser_'||NEW.ins_id);
+    EXECUTE format('CREATE TABLE %I (student_id char(5) NOT NULL,course_id char(5) NOT NULL, accepted_by_instructor char(3), accepted_by_batch_advisor char(3));', 'ticket_batch_adviser_'||NEW.ins_id);
     return NULL;
 END;
 $$;
@@ -108,7 +108,13 @@ temp_dept varchar(10);
 temp_batch integer;
 temp_student_id char(11);
 ticket_row record;
+temp_ins_id INTEGER;
+temp_approved char(3);
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
+    -- get current semester and year
+    SELECT (semester, year) into (temp_semester, temp_year) from current_sem_and_year;
     -- access batch advisor table to get dept_name and batch 
     select dept_name, batch into temp_dept, temp_batch from batch_advisor where ins_id = in_ins_id;
     -- get all students from student table in the batch and dept
@@ -117,14 +123,38 @@ BEGIN
         for ticket_row in EXECUTE format('SELECT * from %I;', 'ticket_student_'||temp_student_id) LOOP 
             -- check if ticket for the student is not alreday approved
             if ticket_row.approved = NULL then
+                --get instructor for the course 
+                EXECUTE format ('select ins_id into %I from %I as CO where CO.course_id = %L;', temp_ins_id, 'course_offering_'||temp_semester||'_'||temp_year, ticket_row.course_id);
+                -- access ticket table of that instructor
+                EXECUTE format('select accepted into %I from %I as TI where TI.student_id = %L', temp_approved, 'ticket_instructor_'||temp_ins_id, temp_student_id);
                 --add row in batch ticket table 
-                EXECUTE format('INSERT INTO %I values(%L, %L);', 'ticket_batch_adviser_'||in_ins_id, temp_student_id, NULL);
+                EXECUTE format('INSERT INTO %I values(%L, %L, %L %L);', 'ticket_batch_adviser_'||in_ins_id, temp_student_id, ticket_row.course_id, temp_approved ,NULL);
         END LOOP; 
     END LOOP; 
-    return NULL:
+    return NULL;
 END;
 $$;
 
 -- STEP4: fiiling dean ticket table 
 
--- all pending tickets from ticket table of all students 
+-- all pending tickets from ticket table of all students
+
+CREATE OR REPLACE FUNCTION get_tickets_dean()
+RETURNS NULL
+LANGUAGE PLPGSQL 
+AS $$ 
+DECLARE 
+temp_ins_id INTEGER;
+temp_record record;
+BEGIN
+    -- get all batch advisors
+    for temp_ins_id in select ins_id from batch_advisor LOOP 
+        -- access all rows of batch advisor ticket tables 
+        for temp_record in EXECUTE format('select * from %I;', 'ticket_batch_advisor_'||temp_ins_id) LOOP 
+            -- add those rows in dean ticket table 
+            INSERT INTO tickets_dean values(temp_record.student_id, temp_record.course_id, temp_record.approved_by_instructor, temp_record.approved_by_batch_advisor, NULL);
+        END LOOP;
+    END LOOP;
+    return NULL;
+END;
+$$;
