@@ -42,24 +42,27 @@ EXECUTE PROCEDURE check_course_in_timetable_slot();*/
 
 
 
-
 -- procedure to get credits registered in previous 2 semesters
--- modify if previous semester are in different year than current one
+-- modify if previous semester are in different year than current one -- done
 CREATE OR REPLACE FUNCTION get_registered_credits_previous_2_semester(input_student_id char(11), input_semester INTEGER, input_year INTEGER)
 RETURNS NUMERIC
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
 trans_student_row record;
-credit_of_previous NUMERIC;
+credit_of_previous NUMERIC:=0;
 temp NUMERIC;
 BEGIN
-    for trans_student_row in EXECUTE format('select * from %I', 'trans_'||input_student_id) LOOP
-        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year THEN
+    for trans_student_row in EXECUTE format('select * from %I;', 'trans_'||input_student_id) LOOP
+        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year AND trans_student_row.grade > 4.0 THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
-        if trans_student_row.semester = input_semester-2 AND trans_student_row.year = input_year THEN
+        if trans_student_row.semester = input_semester+1 AND trans_student_row.year = input_year-1 AND trans_student_row.grade > 4.0 THEN
+            select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
+            credit_of_previous := credit_of_previous + temp;
+        end if;
+        if trans_student_row.semester = input_semester AND trans_student_row.year = input_year-1 AND trans_student_row.grade > 4.0 THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
@@ -75,7 +78,7 @@ LANGUAGE PLPGSQL
 AS $$
 DECLARE
 registration_row record;
-credits_current NUMERIC;
+credits_current NUMERIC:=0;
 temp NUMERIC;
 temp_semester INTEGER;
 temp_year INTEGER;
@@ -129,6 +132,10 @@ Before INSERT
 ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE check_credit_limit();*/
+
+
+
+
 
 
 
