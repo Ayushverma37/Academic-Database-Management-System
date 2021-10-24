@@ -339,7 +339,6 @@ BEGIN
         END IF;
     END;
     END IF;
-
     return NEW;
 END;
 $$;
