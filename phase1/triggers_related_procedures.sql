@@ -118,8 +118,8 @@ BEGIN
     credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, temp_semester, temp_year);
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
-    select CC.c into credits_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
-    if credit_for_new_course + credits_in_this_sem > max_credits_allowed then
+    select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
+    if credits_for_new_course + credits_in_this_sem > max_credits_allowed then
         --ticket generation function call
         raise exception 'Credit limit exceeded, ticket generated';
     end if;
