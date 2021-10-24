@@ -438,7 +438,7 @@ END;
 $$;*/
 
 CREATE OR REPLACE FUNCTION _add_to_course_grade(input_course_id char(5))
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE

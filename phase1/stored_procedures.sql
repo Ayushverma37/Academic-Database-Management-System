@@ -3,7 +3,7 @@
 -- procedure for student registration in a course
 -- procedures to be implemented: allot_section()
 CREATE OR REPLACE FUNCTION registration_in_course(student_id char(11), course_id char(5), section_id INTEGER)
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
@@ -17,7 +17,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION offering_course(course_id char(5), ins_id INTEGER, ins_id2 INTEGER, ins_id3 INTEGER, cgpa_criterion numeric, maxCapacity INTEGER, course_id_Not_Elligible char(5), timetable_slot varchar(10), dept1 char(5), dept2 char(5), dept3 char(5), year1 INTEGER, year2 INTEGER, year3 INTEGER)
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
@@ -32,7 +32,7 @@ $$;
 
 
 CREATE OR REPLACE FUNCTION course_catalog_entry(course_id char(5), L numeric, T numeric, P numeric, S numeric, C numeric, course_id1 char(5), course_id2 char(5), course_id3 char(5))
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
@@ -42,7 +42,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION Timetable_slot_list_entry(timetable_slot char(5))
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
@@ -53,7 +53,7 @@ $$;
 
 -- Procedure for updating grades in trans student table when grades are uploaded by instructor in course grade table
 CREATE OR REPLACE FUNCTION update_grade_in_trans(input_course_id char(5))
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
