@@ -404,7 +404,7 @@ BEGIN
     -- select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
     EXECUTE format ('select cgpa_criterion from %I as CO where CO.course_id=%L;', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into cgpaReq;
     IF (cgpaReq IS NOT NULL) AND (curr_grade<cgpaReq) THEN
-      RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
+      RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for this course';
     END IF;
     return NEW;
 END;
