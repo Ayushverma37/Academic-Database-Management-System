@@ -54,15 +54,15 @@ credit_of_previous NUMERIC:=0;
 temp NUMERIC;
 BEGIN
     for trans_student_row in EXECUTE format('select * from %I;', 'trans_'||input_student_id) LOOP
-        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year AND trans_student_row.grade > 4.0 THEN
+        if trans_student_row.semester = input_semester-1 AND trans_student_row.year = input_year AND trans_student_row.grade >= 4.0 THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
-        if trans_student_row.semester = input_semester+1 AND trans_student_row.year = input_year-1 AND trans_student_row.grade > 4.0 THEN
+        if trans_student_row.semester = input_semester+1 AND trans_student_row.year = input_year-1 AND trans_student_row.grade >= 4.0 THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
-        if trans_student_row.semester = input_semester AND trans_student_row.year = input_year-1 AND trans_student_row.grade > 4.0 THEN
+        if trans_student_row.semester = input_semester AND trans_student_row.year = input_year-1 AND trans_student_row.grade >= 4.0 THEN
             select C into temp from Course_Catalog as CC where CC.course_id = trans_student_row.course_id;
             credit_of_previous := credit_of_previous + temp;
         end if;
