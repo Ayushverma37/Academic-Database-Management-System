@@ -208,7 +208,7 @@ create or replace function get_prereq (cid char(5), stud_id char(11))
 returns table (course char(5),grade INTEGER)
 LANGUAGE plpgsql AS $$
 begin
-return query EXECUTE format('select course_id, grade from %I as TS where TS.course_id=%L and TS.grade>2.0;', 'trans_'||stud_id, cid);
+return query EXECUTE format('select course_id, grade from %I as TS where TS.course_id=%L and TS.grade>=4.0;', 'trans_'||stud_id, cid);
 end; $$;
 
 
@@ -244,6 +244,32 @@ BEGIN
         END IF;
     END;
     END IF;
+    return NEW;
+END;
+$$;
+
+--trigger and procedure to check if student has done course_id_not_eligible course
+create or replace function get_course_prohibition(cid char(5), stud_id char(11))
+returns table (course char(5),grade INTEGER)
+LANGUAGE plpgsql AS $$
+begin
+return query EXECUTE format('select course_id, grade from %I as TS where TS.course_id=%L and TS.grade>=4.0;', 'trans_'||stud_id, cid);
+end; $$;
+
+CREATE OR REPLACE FUNCTION _check_course_id_Not_Elligible()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+course_prohibited char(5);
+BEGIN
+    EXECUTE FORMAT('select course_id_Not_Elligible into %I from %I as where CO.course_id=%L', course_prohibited, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    IF course_prohibited IS NOT NULL THEN
+    BEGIN
+        IF EXISTS (select * from get_course_prohibition(course_prohibited,NEW.student_id)) then
+        RAISE EXCEPTION 'Student has already done same type of course';
+        END IF;
+    END;
     return NEW;
 END;
 $$;
@@ -530,6 +556,11 @@ BEGIN
     ON %I
     FOR EACH ROW
     EXECUTE PROCEDURE _check_prerequisites();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE format('CREATE TRIGGER check_course_id_Not_Elligible
+    BEFORE INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_course_id_Not_Elligible();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for branchAndYear
     EXECUTE format('CREATE TRIGGER check_batchAndYear
     BEFORE INSERT
