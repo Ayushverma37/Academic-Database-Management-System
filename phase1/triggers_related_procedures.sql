@@ -223,21 +223,21 @@ prereq2 char(5);
 prereq3 char(5);
 BEGIN
     select course_id1, course_id2, course_id3 into prereq1, prereq2, prereq3 from Course_Catalog as CC where CC.course_id=NEW.course_id;
-    IF prereq1<>'NULL' THEN
+    IF prereq1 IS NOT NULL THEN
     BEGIN
         IF NOT EXISTS (select * from get_prereq(prereq1,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq1;
         END IF;
     END;
     END IF;
-    IF prereq2<>'NULL' THEN
+    IF prereq2 IS NOT NULL THEN
     BEGIN
         IF NOT EXISTS (select * from get_prereq(prereq2,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq2;
         END IF;
     END;
     END IF;
-    IF prereq3<>'NULL' THEN
+    IF prereq3 IS NOT NULL THEN
     BEGIN
         IF NOT EXISTS (select * from get_prereq(prereq3,NEW.student_id)) then
         RAISE EXCEPTION 'pre-requisite % not met by student',prereq3;
@@ -319,7 +319,7 @@ BEGIN
     LOOP
     select courseAndGrade_row.course_id, courseAndGrade_row.grade into curr_course, curr_grade;
     select CC.C into curr_credits from Course_Catalog as CC where CC.course_id=curr_course;
-    IF curr_grade<>'NULL' then
+    IF curr_grade IS NOT NULL then
     total_credits:=total_credits+curr_credits;
     sum:=sum+(curr_grade*curr_credits);
     END IF;
@@ -344,7 +344,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     -- select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
     EXECUTE format ('select cgpa_criterion into %I from %I as CO where CO.course_id=%L;', cgpaReq, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
-    IF curr_grade<cgpaReq THEN
+    IF (cgpaReq IS NOT NULL) AND (curr_grade<cgpaReq) THEN
       RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
     END IF;
     return NEW;
@@ -400,7 +400,7 @@ BEGIN
     currentCapacity:=maxCapacityOf(NEW.course_id);
     -- select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
     EXECUTE format('select maxCapacity into %I from %I as CO where CO.course_id=%L;', courseCapacity, 'course_offering_'||temp_semester||'_'||temp_year,NEW.course_id);
-    IF currentCapacity>=courseCapacity THEN
+    IF (courseCapacity IS NOT NULL) AND (currentCapacity>=courseCapacity) THEN
       RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
     END IF;
     return NEW;
@@ -474,15 +474,15 @@ BEGIN
     EXECUTE format('CREATE TABLE %I (
         course_id CHAR(5) NOT NULL PRIMARY KEY,
         ins_id INTEGER NOT NULL,
-        ins_id2 INTEGER NOT NULL,
-        ins_id3 INTEGER NOT NULL,
-        cgpa_criterion numeric NOT NULL,
-        maxCapacity INTEGER NOT NULL,
-        course_id_Not_Elligible char(5) NOT NULL ,
+        ins_id2 INTEGER,
+        ins_id3 INTEGER,
+        cgpa_criterion numeric,
+        maxCapacity INTEGER,
+        course_id_Not_Elligible char(5) ,
         timetable_slot varchar(10) NOT NULL,
-        dept1 char(5),
-        dept2 char(5),
-        dept3 char(5),
+        dept1 varchar(5),
+        dept2 varchar(5),
+        dept3 varchar(5),
         year1 INTEGER,
         year2 INTEGER,
         year3 INTEGER,

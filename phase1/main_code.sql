@@ -60,7 +60,7 @@ CREATE TABLE Course_Catalog (
 
 -- Table for timetable slots
 CREATE TABLE Timetable_slot_list(
-    timetable_slot char(5) PRIMARY KEY
+    timetable_slot varchar(10) PRIMARY KEY
 );
 
 -- Table for course offering, course_id, semester, year are primary keys
