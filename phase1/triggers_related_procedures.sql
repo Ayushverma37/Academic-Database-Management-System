@@ -309,21 +309,37 @@ temp_semester INTEGER;
 temp_year INTEGER;
 stud_dept char(5);
 stud_year INTEGER;
+allDept BOOLEAN;
+allYear BOOLEAN;
 
 BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     select dept_name into stud_dept from Student where NEW.student_id=Student.student_id;
     select batch into stud_year from Student where NEW.student_id=Student.student_id;
+    EXECUTE format('select all_dept from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into allDept;
+    EXECUTE format('select all_year from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into allDept;
     EXECUTE format('select dept1 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart1;
     EXECUTE format('select dept2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart2;
     EXECUTE format('select dept3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart3;
     EXECUTE format('select year1 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr1;
     EXECUTE format('select year2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr2;
     EXECUTE format('select year3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr3;
-    IF (((depart1 IS NOT NULL AND stud_dept<>depart1) AND (depart2 IS NOT NULL AND stud_dept<>depart2) AND (depart3 IS NOT NULL AND stud_dept<>depart3)) OR ((yr1 IS NOT NULL AND stud_year<>yr1) AND (yr2 IS NOT NULL AND stud_year<>yr2) AND (yr3 IS NOT NULL AND stud_year<>yr3))) THEN
-        RAISE EXCEPTION 'Course not floated for this branch and year';
+    IF allDept = FALSE THEN
+    BEGIN
+        IF (depart1 IS NOT NULL AND stud_dept<>depart1) OR (depart2 IS NOT NULL AND stud_dept<>depart2) OR (depart3 IS NOT NULL AND stud_dept<>depart3) THEN
+            RAISE EXCEPTION 'Course not floated for this branch';
+        END IF;
+    END;
     END IF;
+    IF allYear = FALSE THEN
+    BEGIN
+        IF (yr1 IS NOT NULL AND stud_year<>yr1) OR (yr2 IS NOT NULL AND stud_year<>yr2) OR (yr3 IS NOT NULL AND stud_year<>yr3) THEN
+            RAISE EXCEPTION 'Course not floated for this year';
+        END IF;
+    END;
+    END IF;
+
     return NEW;
 END;
 $$;
@@ -522,6 +538,8 @@ BEGIN
         cgpa_criterion numeric,
         maxCapacity INTEGER,
         timetable_slot varchar(10) NOT NULL,
+        all_dept BOOLEAN NOT NULL,
+        all_year BOOLEAN NOT NULL,
         dept1 varchar(5),
         dept2 varchar(5),
         dept3 varchar(5),
