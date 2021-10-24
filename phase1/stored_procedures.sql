@@ -65,7 +65,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     FOR grade_row in EXECUTE format('select * from %I', 'grade_'||input_course_id||'_'||temp_semester||'_'||temp_year) LOOP
-        if grade_row.grade<>NULL THEN
+        if grade_row.grade IS NOT NULL THEN
             EXECUTE format('INSERT INTO %I VALUES(%L, %L, %L, %L)', 'trans_'||grade_row.student_id, input_course_id, temp_semester, temp_year, grade_row.grade);
         end if;
     END LOOP;
