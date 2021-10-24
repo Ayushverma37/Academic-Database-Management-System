@@ -31,13 +31,13 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION course_catalog_entry(course_id char(5), L numeric, T numeric, P numeric, S numeric, C numeric, course_id1 char(5), course_id2 char(5), course_id3 char(5))
+CREATE OR REPLACE FUNCTION course_catalog_entry(course_id char(5), L numeric, T numeric, P numeric, S numeric, C numeric, course_id1 char(5), course_id2 char(5), course_id3 char(5), course_id_Not_Elligible char(5))
 RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
 BEGIN
-    EXECUTE format('INSERT INTO Course_Catalog values(%L, %L, %L, %L, %L, %L, %L, %L, %L);',course_id, L, T, P, S, C, course_id1, course_id2, course_id3);
+    EXECUTE format('INSERT INTO Course_Catalog values(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L);',course_id, L, T, P, S, C, course_id1, course_id2, course_id3, course_id_Not_Elligible);
 END;
 $$;
 
