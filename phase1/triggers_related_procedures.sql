@@ -263,7 +263,7 @@ AS $$
 DECLARE
 course_prohibited char(5);
 BEGIN
-    EXECUTE FORMAT('select course_id_Not_Elligible into %I from %I as where CO.course_id=%L', course_prohibited, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    EXECUTE FORMAT('select course_id_Not_Elligible from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into course_prohibited;
     IF course_prohibited IS NOT NULL THEN
     BEGIN
         IF EXISTS (select * from get_course_prohibition(course_prohibited,NEW.student_id)) then
@@ -304,7 +304,12 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     select dept_name into stud_dept from Student where NEW.student_id=Student.student_id;
     select batch into stud_year from Student where NEW.student_id=Student.student_id;
-    EXECUTE format('select dept1, dept2, dept3, year1, year2, year3 into %I, %I, %I, %I, %I, %I from %I as CO where CO.course_id=%L',depart1, depart2, depart3, yr1, yr2, yr3, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    EXECUTE format('select dept1 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart1;
+    EXECUTE format('select dept2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart2;
+    EXECUTE format('select dept3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart3;
+    EXECUTE format('select year1 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr1;
+    EXECUTE format('select year2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr2;
+    EXECUTE format('select year3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr3;
     IF (((stud_dept<>depart1) AND (stud_dept<>depart2) AND (stud_dept<>depart3)) OR ((stud_year<>yr1) AND (stud_year<>yr2) AND (stud_year<>yr3))) THEN
         RAISE EXCEPTION 'Course not floated for this branch and year';
     END IF;
@@ -370,7 +375,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     -- select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
-    EXECUTE format ('select cgpa_criterion into %I from %I as CO where CO.course_id=%L;', cgpaReq, 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id);
+    EXECUTE format ('select cgpa_criterion from %I as CO where CO.course_id=%L;', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into cgpaReq;
     IF (cgpaReq IS NOT NULL) AND (curr_grade<cgpaReq) THEN
       RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for thic course';
     END IF;
@@ -406,7 +411,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     -- select count(*) into cap from Student_Registration as SR where SR.course_id=input_course_id AND SR.semester = input_semester AND SR.year = input_year;
-    EXECUTE format('select count(*) into cap from %I as SR where SR.course_id= %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_course_id);
+    EXECUTE format('select count(*) from %I as SR where SR.course_id= %L;', 'student_registration_'||temp_semester||'_'||temp_year, input_course_id) into cap;
     return cap;
 END;
 $$;
@@ -426,7 +431,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     currentCapacity:=maxCapacityOf(NEW.course_id);
     -- select maxCapacity into courseCapacity from Course_Offering as CO where CO.course_id=NEW.course_id;
-    EXECUTE format('select maxCapacity into %I from %I as CO where CO.course_id=%L;', courseCapacity, 'course_offering_'||temp_semester||'_'||temp_year,NEW.course_id);
+    EXECUTE format('select maxCapacity from %I as CO where CO.course_id=%L;', 'course_offering_'||temp_semester||'_'||temp_year,NEW.course_id) into courseCapacity;
     IF (courseCapacity IS NOT NULL) AND (currentCapacity>=courseCapacity) THEN
       RAISE EXCEPTION 'Course Capacity has already been reached for % course',NEW.course_id;
     END IF;

@@ -124,9 +124,9 @@ BEGIN
             -- check if ticket for the student is not alreday approved
             if ticket_row.approved = NULL then
                 --get instructor for the course 
-                EXECUTE format ('select ins_id into %I from %I as CO where CO.course_id = %L;', temp_ins_id, 'course_offering_'||temp_semester||'_'||temp_year, ticket_row.course_id);
+                EXECUTE format ('select ins_id from %I as CO where CO.course_id = %L;', 'course_offering_'||temp_semester||'_'||temp_year, ticket_row.course_id) into temp_ins_id;
                 -- access ticket table of that instructor
-                EXECUTE format('select accepted into %I from %I as TI where TI.student_id = %L', temp_approved, 'ticket_instructor_'||temp_ins_id, temp_student_id);
+                EXECUTE format('select accepted from %I as TI where TI.student_id = %L', 'ticket_instructor_'||temp_ins_id, temp_student_id) into temp_approved;
                 --add row in batch ticket table 
                 EXECUTE format('INSERT INTO %I values(%L, %L, %L %L);', 'ticket_batch_adviser_'||in_ins_id, temp_student_id, ticket_row.course_id, temp_approved ,NULL);
         END LOOP; 
