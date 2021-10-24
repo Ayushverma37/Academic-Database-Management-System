@@ -263,7 +263,7 @@ AS $$
 DECLARE
 course_prohibited char(5);
 BEGIN
-    EXECUTE FORMAT('select course_id_Not_Elligible from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into course_prohibited;
+    select course_id_Not_Elligible into course_prohibited from Course_Catalog as CC where CC.course_id=NEW.course_id;
     IF course_prohibited IS NOT NULL THEN
     BEGIN
         IF EXISTS (select * from get_course_prohibition(course_prohibited,NEW.student_id)) then
@@ -510,7 +510,6 @@ BEGIN
         ins_id3 INTEGER,
         cgpa_criterion numeric,
         maxCapacity INTEGER,
-        course_id_Not_Elligible char(5) ,
         timetable_slot varchar(10) NOT NULL,
         dept1 varchar(5),
         dept2 varchar(5),
@@ -519,7 +518,6 @@ BEGIN
         year2 INTEGER,
         year3 INTEGER,
         FOREIGN KEY(course_id) REFERENCES Course_Catalog(course_id),
-        FOREIGN KEY(course_id_Not_Elligible) REFERENCES Course_Catalog(course_id),
         FOREIGN KEY(ins_id) REFERENCES Instructor(ins_id),
         FOREIGN KEY(ins_id2) REFERENCES Instructor(ins_id),
         FOREIGN KEY(ins_id3) REFERENCES Instructor(ins_id),

@@ -55,7 +55,8 @@ CREATE TABLE Course_Catalog (
     C numeric NOT NULL,
     course_id1 char(5),
     course_id2 char(5),
-    course_id3 char(5)
+    course_id3 char(5),
+    course_id_Not_Elligible char(5)
 );
 
 -- Table for timetable slots
