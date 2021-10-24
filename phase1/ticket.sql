@@ -73,7 +73,7 @@ CREATE TABLE tickets_dean (student_id char(11) NOT NULL, course_id char(5) NOT N
 -- add them to instructor ticket table
 
 CREATE OR REPLACE FUNCTION get_tickets_instructor(in_course_id char(5), in_ins_id INTEGER)
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL 
 AS $$ 
 DECLARE 
@@ -100,7 +100,7 @@ $$;
 -- add them into batch_advisor ticket table 
 
 CREATE OR REPLACE FUNCTION get_tickets_batch_advisor(in_ins_id INTEGER)
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL 
 AS $$ 
 DECLARE 
@@ -140,7 +140,7 @@ $$;
 -- all pending tickets from ticket table of all students
 
 CREATE OR REPLACE FUNCTION get_tickets_dean()
-RETURNS NULL
+RETURNS VOID
 LANGUAGE PLPGSQL 
 AS $$ 
 DECLARE 
