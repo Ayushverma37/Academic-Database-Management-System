@@ -107,8 +107,12 @@ credits_registered numeric;
 max_credits_allowed numeric;
 credits_in_this_sem numeric;
 credits_for_new_course numeric;
+temp_semester INTEGER;
+temp_year INTEGER;
 BEGIN
-    credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, NEW.semester, NEW.year);
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, temp_semester, temp_year);
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
     select CO.c into credits_for_new_course from Course_Catalog as CC where CC.course_id = NEW.course_id;
