@@ -270,6 +270,7 @@ BEGIN
         RAISE EXCEPTION 'Student has already done same type of course';
         END IF;
     END;
+    END IF;
     return NEW;
 END;
 $$;
