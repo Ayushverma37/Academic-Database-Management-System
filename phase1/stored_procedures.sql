@@ -16,7 +16,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION offering_course(course_id char(5), ins_id INTEGER, ins_id2 INTEGER, ins_id3 INTEGER, cgpa_criterion numeric, maxCapacity INTEGER, course_id_Not_Elligible char(5), timetable_slot varchar(10),all_dept BOOLEAN, all_year BOOLEAN, dept1 char(5), dept2 char(5), dept3 char(5), year1 INTEGER, year2 INTEGER, year3 INTEGER)
+CREATE OR REPLACE FUNCTION offering_course(course_id char(5), ins_id INTEGER, ins_id2 INTEGER, ins_id3 INTEGER, cgpa_criterion numeric, maxCapacity INTEGER, timetable_slot varchar(10),all_dept BOOLEAN, all_year BOOLEAN, dept1 char(5), dept2 char(5), dept3 char(5), year1 INTEGER, year2 INTEGER, year3 INTEGER)
 RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
