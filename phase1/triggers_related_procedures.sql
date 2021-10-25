@@ -498,7 +498,7 @@ BEGIN
     return NULL;
 END;
 $$;*/
-
+/*
 CREATE OR REPLACE FUNCTION _add_to_course_grade(input_course_id char(5))
 RETURNS VOID
 LANGUAGE PLPGSQL
@@ -515,7 +515,7 @@ BEGIN
     END LOOP;
 END;
 $$;
-
+*/
 /*CREATE TRIGGER add_to_course_grade
 AFTER INSERT
 ON Student_Registration
