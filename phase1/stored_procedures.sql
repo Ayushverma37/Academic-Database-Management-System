@@ -108,3 +108,28 @@ BEGIN
                     CSV HEADER;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year, file_path, comma_literal);
 END;
 $$;
+
+-- procedure for report generation
+CREATE OR REPLACE FUNCTION report_generation(in_student_id char(11))
+RETURNS NUMERIC 
+LANGUAGE PLPGSQL 
+AS $$ 
+DECLARE 
+temp_semester integer;
+temp_year integer;
+trans_student_row record;
+cgpa numeric;
+BEGIN 
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    EXECUTE format('DROP TABLE IF EXISTS %I;', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
+    EXECUTE format('CREATE TABLE %I (course_id char(5), grade integer);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
+    for trans_student_row in EXECUTE format('select * from %I;', 'trans_'||in_student_id) LOOP
+        if trans_student_row.semester = temp_semester AND trans_student_row.year = temp_year then 
+            EXECUTE format('INSERT into %I values(%L, %L);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year, trans_student_row.course_id, trans_student_row.grade);
+        end if;
+    end LOOP;
+    cgpa := curr_cgpa(in_student_id);
+    return cgpa;
+END;
+$$;
