@@ -81,16 +81,16 @@ temp_student_id char(11);
 ticket_row record;
 BEGIN 
     -- get all student_id
-    for temp_student_id in select student_id from Students LOOP
+    for temp_student_id in select student_id from Student LOOP
         --access their ticket tables
         for ticket_row in EXECUTE format('SELECT * from %I;', 'ticket_student_'||temp_student_id) LOOP 
             -- check if ticket for the course exists and not already checked
-            if ticket_row.course_id = in_course_id AND ticket_row.approved = NULL then
+            if ticket_row.course_id = in_course_id AND ticket_row.approved IS NULL then
                 --add row in instructor ticket table 
                 EXECUTE format('INSERT INTO %I values(%L, %L, %L);', 'ticket_instructor_'||in_ins_id, temp_student_id, ticket_row.course_id, NULL);
+            end if;
         END LOOP;
     END LOOP; 
-    return NULL;
 END;
 $$;
 
