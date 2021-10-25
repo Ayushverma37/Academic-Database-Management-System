@@ -53,7 +53,7 @@ RETURNS TRIGGER
 LANGUAGE PLPGSQL 
 AS $$ 
 BEGIN
-    EXECUTE format('CREATE TABLE %I (student_id char(5) NOT NULL,course_id char(5) NOT NULL, accepted_by_instructor char(3), accepted_by_batch_advisor char(3));', 'ticket_batch_adviser_'||NEW.ins_id);
+    EXECUTE format('CREATE TABLE %I (student_id char(11) NOT NULL,course_id char(5) NOT NULL, accepted_by_instructor char(3), accepted_by_batch_advisor char(3));', 'ticket_batch_adviser_'||NEW.ins_id);
     return NULL;
 END;
 $$;
@@ -99,7 +99,7 @@ $$;
 -- search ticket tables of all students in his/her batch 
 -- add them into batch_advisor ticket table 
 
-CREATE OR REPLACE FUNCTION get_tickets_batch_advisor(in_ins_id INTEGER)
+CREATE OR REPLACE FUNCTION get_tickets_batch_adviser(in_ins_id INTEGER)
 RETURNS VOID
 LANGUAGE PLPGSQL 
 AS $$ 
@@ -114,24 +114,25 @@ temp_semester INTEGER;
 temp_year INTEGER;
 BEGIN
     -- get current semester and year
-    SELECT (semester, year) into (temp_semester, temp_year) from current_sem_and_year;
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
     -- access batch advisor table to get dept_name and batch 
-    select dept_name, batch into temp_dept, temp_batch from batch_advisor where ins_id = in_ins_id;
+    select dept_name, batch into temp_dept, temp_batch from batch_adviser where ins_id = in_ins_id;
     -- get all students from student table in the batch and dept
-    for temp_student_id in select student_id from Students where dept_name = temp_dept and batch = temp_batch LOOP 
+    for temp_student_id in select student_id from Student where dept_name = temp_dept and batch = temp_batch LOOP 
         -- check the ticket tables of all students in the batch 
         for ticket_row in EXECUTE format('SELECT * from %I;', 'ticket_student_'||temp_student_id) LOOP 
             -- check if ticket for the student is not alreday approved
-            if ticket_row.approved = NULL then
+            if ticket_row.approved IS NULL then
                 --get instructor for the course 
                 EXECUTE format ('select ins_id from %I as CO where CO.course_id = %L;', 'course_offering_'||temp_semester||'_'||temp_year, ticket_row.course_id) into temp_ins_id;
                 -- access ticket table of that instructor
                 EXECUTE format('select accepted from %I as TI where TI.student_id = %L', 'ticket_instructor_'||temp_ins_id, temp_student_id) into temp_approved;
                 --add row in batch ticket table 
-                EXECUTE format('INSERT INTO %I values(%L, %L, %L %L);', 'ticket_batch_adviser_'||in_ins_id, temp_student_id, ticket_row.course_id, temp_approved ,NULL);
+                EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L);', 'ticket_batch_adviser_'||in_ins_id, temp_student_id, ticket_row.course_id, temp_approved ,NULL);
+            end if;
         END LOOP; 
     END LOOP; 
-    return NULL;
 END;
 $$;
 
