@@ -26,7 +26,7 @@ temp_year INTEGER;
 BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
-    EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);', 'course_offering_'||temp_semester||'_'||temp_year, course_id, ins_id, ins_id2, ins_id3, cgpa_criterion, maxCapacity, course_id_Not_Elligible, timetable_slot, dept1, dept2, dept3, year1, year2, year3);
+    EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);', 'course_offering_'||temp_semester||'_'||temp_year, course_id, ins_id, ins_id2, ins_id3, cgpa_criterion, maxCapacity, timetable_slot,all_dept, all_year, dept1, dept2, dept3, year1, year2, year3);
 END;
 $$;
 
