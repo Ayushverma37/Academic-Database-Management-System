@@ -318,7 +318,7 @@ BEGIN
     select dept_name into stud_dept from Student where NEW.student_id=Student.student_id;
     select batch into stud_year from Student where NEW.student_id=Student.student_id;
     EXECUTE format('select all_dept from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into allDept;
-    EXECUTE format('select all_year from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into allDept;
+    EXECUTE format('select all_year from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into allYear;
     EXECUTE format('select dept1 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart1;
     EXECUTE format('select dept2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart2;
     EXECUTE format('select dept3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into depart3;
