@@ -101,7 +101,7 @@ $$;
 -- get_registered_credits_previous_2_semester
 -- get_credits_registered_in_this_sem
 -- ticket generation function call
-CREATE OR REPLACE FUNCTION check_credit_limit()
+CREATE OR REPLACE FUNCTION z_check_credit_limit()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
@@ -581,11 +581,11 @@ BEGIN
     FOR EACH ROW
     EXECUTE PROCEDURE check_course_in_timetable_slot();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for credit limit
-    EXECUTE format('CREATE TRIGGER credit_limit_trigger
+    EXECUTE format('CREATE TRIGGER z_credit_limit_trigger
     Before INSERT
     ON %I
     FOR EACH ROW
-    EXECUTE PROCEDURE check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE PROCEDURE z_check_credit_limit();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for pre-requisites
     EXECUTE format('CREATE TRIGGER check_prerequisites
     BEFORE INSERT
