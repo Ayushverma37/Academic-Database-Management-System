@@ -149,13 +149,12 @@ temp_ins_id INTEGER;
 temp_record record;
 BEGIN
     -- get all batch advisors
-    for temp_ins_id in select ins_id from batch_advisor LOOP 
+    for temp_ins_id in select ins_id from batch_adviser LOOP 
         -- access all rows of batch advisor ticket tables 
-        for temp_record in EXECUTE format('select * from %I;', 'ticket_batch_advisor_'||temp_ins_id) LOOP 
+        for temp_record in EXECUTE format('select * from %I;', 'ticket_batch_adviser_'||temp_ins_id) LOOP 
             -- add those rows in dean ticket table 
-            INSERT INTO tickets_dean values(temp_record.student_id, temp_record.course_id, temp_record.approved_by_instructor, temp_record.approved_by_batch_advisor, NULL);
+            INSERT INTO tickets_dean values(temp_record.student_id, temp_record.course_id, temp_record.accepted_by_instructor, temp_record.accepted_by_batch_advisor, NULL);
         END LOOP;
     END LOOP;
-    return NULL;
 END;
 $$;
