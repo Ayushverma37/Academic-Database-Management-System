@@ -33,7 +33,7 @@ BEGIN
     EXECUTE format('GRANT SELECT ON %I TO %I;', student, 'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON %I TO %I;', instructor, 'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON %I TO %I;', batch_adviser, 'instructor_'||NEW.ins_id);
-    EXECUTE format('GRANT SELECT ON %I TO %I;', Course_Catalog, 'instructor_'||NEW.ins_id;
+    EXECUTE format('GRANT SELECT ON %I TO %I;', Course_Catalog, 'instructor_'||NEW.ins_id);
     return NULL;
 END;
 $$;
