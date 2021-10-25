@@ -326,14 +326,18 @@ BEGIN
     EXECUTE format('select year2 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr2;
     EXECUTE format('select year3 from %I as CO where CO.course_id=%L', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into yr3;
     IF allDept = FALSE THEN
+    BEGIN
         IF (depart1 IS NOT NULL AND stud_dept!=depart1) OR (depart2 IS NOT NULL AND stud_dept!=depart2) OR (depart3 IS NOT NULL AND stud_dept!=depart3) THEN
             RAISE EXCEPTION 'Course not floated for this branch';
         END IF;
+    END;
     END IF;
     IF allYear = FALSE THEN
+    BEGIN
         IF (yr1 IS NOT NULL AND stud_year!=yr1) OR (yr2 IS NOT NULL AND stud_year!=yr2) OR (yr3 IS NOT NULL AND stud_year!=yr3) THEN
             RAISE EXCEPTION 'Course not floated for this year';
         END IF;
+    END;
     END IF;
     return NEW;
 END;
