@@ -331,7 +331,7 @@ BEGIN
         END IF;
     END IF;
     IF allYear = FALSE THEN
-        IF (yr1 IS NOT NULL AND stud_year<>yr1) OR (yr2 IS NOT NULL AND stud_year<>yr2) OR (yr3 IS NOT NULL AND stud_year<>yr3) THEN
+        IF (yr1 IS NOT NULL AND stud_year!=yr1) OR (yr2 IS NOT NULL AND stud_year!=yr2) OR (yr3 IS NOT NULL AND stud_year!=yr3) THEN
             RAISE EXCEPTION 'Course not floated for this year';
         END IF;
     END IF;
