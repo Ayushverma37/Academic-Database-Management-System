@@ -158,3 +158,41 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+-- Procedure to convey final decision to student about ticket approved or not.
+-- If approved -- set column of student ticket table to YES else NO.
+-- Also add rows in student registration, if the ticket is approved.
+
+CREATE OR REPLACE FUNCTION convey_final_decision()
+RETURNS VOID 
+LANGUAGE PLPGSQL 
+AS $$ 
+DECLARE 
+dean_ticket_row record;
+temp_semester INTEGER;
+temp_year INTEGER;
+temp_section INTEGER;
+temp_ins_id INTEGER;
+BEGIN 
+    -- get values of current semester and year
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    -- access each row of dean tickets table 
+    for dean_ticket_row in select * from tickets_dean LOOP 
+        -- if final decision is decided
+        if dean_ticket_row.final_decision IS NOT NULL then 
+            -- update entry in student ticket table 
+            EXECUTE format('UPDATE %I set approved = %L where course_id = %L;', 'ticket_student_'||dean_ticket_row.student_id, dean_ticket_row.final_decision, dean_ticket_row.course_id);
+            -- check if decision is approved 
+            if dean_ticket_row.final_decision = 'YES' then 
+                -- get instructor for the course
+                EXECUTE format('select ins_id from %I where course_id = %L;', 'course_offering_'||temp_semester||'_'||temp_year, dean_ticket_row.course_id) into temp_ins_id;
+                -- get a section for the course 
+                EXECUTE format('select section_id from %I where course_id = %L and ins_id = %L;', 'section_'||temp_semester||'_'||temp_year, dean_ticket_row.course_id, temp_ins_id) into temp_section;
+                -- add row in student registration
+                EXECUTE format('INSERT INTO %I values(%L, %L, %L);', 'student_registration_'||temp_semester||'_'||temp_year, dean_ticket_row.student_id, dean_ticket_row.course_id, temp_section);
+            end if;
+        end if;
+    END LOOP;
+END;
+$$;
