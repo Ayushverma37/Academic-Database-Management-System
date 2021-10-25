@@ -159,6 +159,8 @@ BEGIN
 END;
 $$;
 
+-- STEP5: conveying final decision
+
 -- Procedure to convey final decision to student about ticket approved or not.
 -- If approved -- set column of student ticket table to YES else NO.
 -- Also add rows in student registration, if the ticket is approved.
