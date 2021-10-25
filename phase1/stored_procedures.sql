@@ -88,3 +88,23 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+-- procedure to upload grades to course_grade table by instructor from .csv file
+CREATE OR REPLACE FUNCTION get_grades_from_file(file_path VARCHAR(100), in_course_id char(5))
+RETURNS VOID
+LANGUAGE PLPGSQL 
+AS $$ 
+DECLARE 
+temp_semester integer;
+temp_year integer;
+comma_literal char(1);
+BEGIN 
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    comma_literal := ',';
+    EXECUTE format('COPY %I(student_id, grade)
+                    FROM %L
+                    DELIMITER %L
+                    CSV HEADER;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year, file_path, comma_literal);
+END;
+$$;
