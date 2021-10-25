@@ -41,7 +41,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION Timetable_slot_list_entry(timetable_slot char(5))
+CREATE OR REPLACE FUNCTION Timetable_slot_list_entry(timetable_slot varchar(10))
 RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
