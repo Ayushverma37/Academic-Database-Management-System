@@ -175,6 +175,7 @@ AS $$
 DECLARE 
 temp_semester INTEGER;
 temp_year INTEGER;
+temp_student_id char(11);
 temp_ins_id integer;
 temp_batch_adviser record;
 BEGIN
