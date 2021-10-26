@@ -11,6 +11,10 @@ BEGIN
     EXECUTE format('GRANT SELECT ON instructor TO %I;',  NEW.student_id);
     EXECUTE format('GRANT SELECT ON batch_adviser TO %I;',  NEW.student_id);
     EXECUTE format('GRANT SELECT ON Course_Catalog TO %I;', NEW.student_id);
+    EXECUTE format('GRANT SELECT,INSERT ON %I TO %I;', 'ticket_student_'||NEW.student_id, NEW.student_id);
+    EXECUTE format('REVOKE ALL ON %I FROM %I;', 'ticket_instructor_'||NEW.ins_id, NEW.student_id);
+    EXECUTE format('REVOKE ALL ON %I FROM %I;', 'ticket_batch_adviser_'||NEW.ins_id, NEW.student_id);
+    EXECUTE format('REVOKE ALL ON tickets_dean FROM %I;', NEW.student_id);
     return NULL;
 END;
 $$;
@@ -34,6 +38,10 @@ BEGIN
     EXECUTE format('GRANT SELECT ON instructor TO %I;', 'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON batch_adviser TO %I;', 'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON Course_Catalog TO %I;',  'instructor_'||NEW.ins_id);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'ticket_student_'||NEW.student_id, 'instructor_'||NEW.ins_id);
+    EXECUTE format('GRANT ALL ON %I TO %I;', 'ticket_instructor_'||NEW.ins_id, 'instructor_'||NEW.ins_id);
+    EXECUTE format('REVOKE ALL ON %I FROM %I;', 'ticket_batch_adviser_'||NEW.ins_id, 'instructor_'||NEW.ins_id);
+    EXECUTE format('REVOKE ALL ON tickets_dean FROM %I;', 'instructor_'||NEW.ins_id);
     return NULL;
 END;
 $$;
@@ -57,6 +65,10 @@ BEGIN
     EXECUTE format('GRANT SELECT ON instructor TO %I;', 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
     EXECUTE format('GRANT SELECT ON batch_adviser TO %I;', 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
     EXECUTE format('GRANT SELECT ON Course_Catalog TO %I;', 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'ticket_student_'||NEW.student_id, 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'ticket_instructor_'||NEW.ins_id, 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
+    EXECUTE format('GRANT ALL ON %I TO %I;', 'ticket_batch_adviser_'||NEW.ins_id, 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
+    EXECUTE format('REVOKE ALL ON tickets_dean FROM %I;', 'batch_adviser_'||NEW.ins_id||'_'||NEW.batch);
     return NULL;
 END;
 $$;
