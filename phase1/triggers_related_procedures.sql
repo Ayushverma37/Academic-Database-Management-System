@@ -596,12 +596,12 @@ BEGIN
     FOR temp_student_id in select student_id from student LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
-        EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
+        EXECUTE format('GRANT SELECT, INSERT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
     END LOOP;
 
     FOR temp_ins_id in select ins_id from instructor LOOP 
-        EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
-        EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
+        EXECUTE format('GRANT SELECT, INSERT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
+        EXECUTE format('GRANT SELECT, INSERT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
     END LOOP;
 
