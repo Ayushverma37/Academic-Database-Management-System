@@ -175,11 +175,19 @@ AS $$
 DECLARE 
 temp_semester INTEGER;
 temp_year INTEGER;
+temp_ins_id integer;
+temp_batch_adviser record;
 BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
-    --EXECUTE format('CREATE TRIGGER %I AFTER UPDATE ON %I FOR EACH ROW EXECUTE PROCEDURE update_grade_in_trans_student(%L, %L, %L); ', 'grade_entry_'|| NEW.course_id || '_' || temp_semester || '_' || temp_year, 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.course_id, temp_semester, temp_year);
+    FOR temp_ins_id in select ins_id from instructor LOOP 
+        EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'trans_'||NEW.student_id, 'instructor_'||temp_ins_id);
+    END LOOP;
+
+    FOR temp_batch_adviser in select * from batch_adviser LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+    END LOOP;
     return NULL;
 END;
 $$;
@@ -201,8 +209,23 @@ CREATE OR REPLACE FUNCTION create_trans_student_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
+DECLARE 
+temp_student_id char(11);
+temp_ins_id integer;
+temp_batch_adviser record;
 BEGIN
     EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade INTEGER NOT NULL);', 'trans_'||NEW.student_id );
+    FOR temp_student_id in select student_id from student LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, temp_student_id);
+    END LOOP;
+
+    FOR temp_ins_id in select ins_id from instructor LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'instructor_'||temp_ins_id);
+    END LOOP;
+
+    FOR temp_batch_adviser in select * from batch_adviser LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+    END LOOP;
     RETURN NULL;
 END;
 $$;
