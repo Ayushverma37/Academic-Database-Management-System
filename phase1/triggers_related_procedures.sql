@@ -548,6 +548,10 @@ CREATE OR REPLACE FUNCTION _create_course_offering_student_registration()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
+DECLARE 
+temp_student_id char(11);
+temp_ins_id integer;
+temp_batch_adviser record;
 BEGIN
     EXECUTE format('CREATE TABLE %I (
         course_id CHAR(5) NOT NULL PRIMARY KEY,
@@ -588,6 +592,24 @@ BEGIN
         FOREIGN KEY(course_id, section_id) REFERENCES %I(course_id, section_id),
         PRIMARY KEY(student_id, course_id)
     );', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'section'||'_'||NEW.semester||'_'||NEW.year);
+
+    FOR temp_student_id in select student_id from student LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, temp_student_id);
+    END LOOP;
+
+    FOR temp_ins_id in select ins_id from instructor LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
+    END LOOP;
+
+    FOR temp_batch_adviser in select * from batch_adviser LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+    END LOOP;
 
     -- triggers on student registration
     -- trigger for timetable_slot checking
