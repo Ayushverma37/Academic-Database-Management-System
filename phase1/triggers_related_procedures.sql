@@ -181,6 +181,10 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
+    FOR temp_student_id in select student_id from student LOOP 
+        EXECUTE format('REVOKE ALL ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, temp_student_id);
+    END LOOP;
+    
     FOR temp_ins_id in select ins_id from instructor LOOP 
         EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'instructor_'||temp_ins_id);
     END LOOP;
