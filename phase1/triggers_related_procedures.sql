@@ -182,11 +182,11 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
     FOR temp_ins_id in select ins_id from instructor LOOP 
-        EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'trans_'||NEW.student_id, 'instructor_'||temp_ins_id);
+        EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'instructor_'||temp_ins_id);
     END LOOP;
 
     FOR temp_batch_adviser in select * from batch_adviser LOOP 
-        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
     END LOOP;
     return NULL;
 END;
