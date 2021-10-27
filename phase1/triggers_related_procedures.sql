@@ -229,7 +229,7 @@ BEGIN
     FOR temp_batch_adviser in select * from batch_adviser LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
     END LOOP;
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$;
 
