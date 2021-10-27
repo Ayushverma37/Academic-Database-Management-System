@@ -680,7 +680,7 @@ BEGIN
     Before INSERT
     ON %I
     FOR EACH ROW
-    EXECUTE PROCEDURE _check_valid_user;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE PROCEDURE _check_valid_user();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for timetable_slot checking
     EXECUTE format('CREATE TRIGGER course_in_timetable_slot
     Before INSERT
