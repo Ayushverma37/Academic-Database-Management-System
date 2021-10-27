@@ -187,7 +187,7 @@ BEGIN
     --     EXECUTE format('REVOKE ALL ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, temp_student_id);
     -- END LOOP;
     
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.ins_id);
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'instructor_'||NEW.ins_id);
 
 
     FOR temp_batch_adviser in select * from batch_adviser LOOP 
