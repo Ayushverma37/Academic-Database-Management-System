@@ -234,7 +234,7 @@ END;
 $$;
 
 CREATE TRIGGER trans_student_grade
-AFTER INSERT
+BEFORE INSERT
 ON Student
 FOR EACH ROW
 EXECUTE PROCEDURE create_trans_student_table();
