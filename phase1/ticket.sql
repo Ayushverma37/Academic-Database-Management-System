@@ -23,7 +23,7 @@ END;
 $$;
 
 CREATE TRIGGER ticket_student
-AFTER INSERT 
+BEFORE INSERT 
 ON Student 
 FOR EACH ROW 
 EXECUTE PROCEDURE create_student_ticket();
@@ -41,7 +41,7 @@ END;
 $$;
 
 CREATE TRIGGER ticket_instructor
-AFTER INSERT 
+BEFORE INSERT 
 ON Instructor 
 FOR EACH ROW 
 EXECUTE PROCEDURE create_instructor_ticket();
@@ -59,7 +59,7 @@ END;
 $$;
 
 CREATE TRIGGER ticket_batch_adviser
-AFTER INSERT 
+BEFORE INSERT 
 ON batch_adviser
 FOR EACH ROW 
 EXECUTE PROCEDURE create_batch_adviser_ticket();
