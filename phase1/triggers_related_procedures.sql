@@ -186,9 +186,8 @@ BEGIN
     --     EXECUTE format('REVOKE ALL ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, temp_student_id);
     -- END LOOP;
     
-    FOR temp_ins_id in select ins_id from instructor LOOP 
-        EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'instructor_'||temp_ins_id);
-    END LOOP;
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, NEW.ins_id);
+
 
     FOR temp_batch_adviser in select * from batch_adviser LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
@@ -222,7 +221,7 @@ BEGIN
     
     EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, NEW.student_id);
 
-    FOR temp_ins_id in select ins_id from instructor LOOP 
+    FOR temp_ins_id in (select ins_id from instructor) LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'instructor_'||temp_ins_id);
     END LOOP;
 
