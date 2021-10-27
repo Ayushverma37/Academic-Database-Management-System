@@ -182,9 +182,9 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     EXECUTE format('CREATE TABLE %I (student_id char(11) PRIMARY KEY, grade INTEGER);', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year);
-    FOR temp_student_id in select student_id from student LOOP 
-        EXECUTE format('REVOKE ALL ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, temp_student_id);
-    END LOOP;
+    -- FOR temp_student_id in select student_id from student LOOP 
+    --     EXECUTE format('REVOKE ALL ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, temp_student_id);
+    -- END LOOP;
     
     FOR temp_ins_id in select ins_id from instructor LOOP 
         EXECUTE format('GRANT SELECT, INSERT, UPDATE, CREATE, DELETE, TRIGGER ON %I TO %I;', 'grade_' || NEW.course_id || '_' || temp_semester || '_' || temp_year, 'instructor_'||temp_ins_id);
@@ -214,15 +214,13 @@ CREATE OR REPLACE FUNCTION create_trans_student_table()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
-DECLARE 
-temp_student_id char(11);
+DECLARE
 temp_ins_id integer;
 temp_batch_adviser record;
 BEGIN
     EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, semester integer NOT NULL, year integer NOT NULL, grade INTEGER NOT NULL);', 'trans_'||NEW.student_id );
-    FOR temp_student_id in select student_id from student LOOP 
-        EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, temp_student_id);
-    END LOOP;
+    
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, NEW.student_id);
 
     FOR temp_ins_id in select ins_id from instructor LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, 'instructor_'||temp_ins_id);
