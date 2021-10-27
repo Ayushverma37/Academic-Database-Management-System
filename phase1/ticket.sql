@@ -18,7 +18,7 @@ LANGUAGE PLPGSQL
 AS $$ 
 BEGIN
     EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, approved char(3));', 'ticket_student_'||NEW.student_id);
-    return NULL;
+    return NEW;
 END;
 $$;
 
@@ -36,7 +36,7 @@ LANGUAGE PLPGSQL
 AS $$ 
 BEGIN
     EXECUTE format('CREATE TABLE %I (student_id char(11) NOT NULL, course_id char(5) NOT NULL, accepted char(3));', 'ticket_instructor_'||NEW.ins_id);
-    return NULL;
+    return NEW;
 END;
 $$;
 
@@ -54,7 +54,7 @@ LANGUAGE PLPGSQL
 AS $$ 
 BEGIN
     EXECUTE format('CREATE TABLE %I (student_id char(11) NOT NULL,course_id char(5) NOT NULL, accepted_by_instructor char(3), accepted_by_batch_advisor char(3));', 'ticket_batch_adviser_'||NEW.ins_id);
-    return NULL;
+    return NEW;
 END;
 $$;
 
