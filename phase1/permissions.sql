@@ -12,6 +12,7 @@ BEGIN
     EXECUTE format('GRANT SELECT ON batch_adviser TO %I;',  NEW.student_id);
     EXECUTE format('GRANT SELECT ON Course_Catalog TO %I;', NEW.student_id);
     EXECUTE format('GRANT SELECT,INSERT ON %I TO %I;', 'ticket_student_'||NEW.student_id, NEW.student_id);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'trans_'||NEW.student_id, NEW.student_id);
     --EXECUTE format('REVOKE ALL ON %I FROM %I;', 'ticket_instructor_'||NEW.ins_id, NEW.student_id);
     --EXECUTE format('REVOKE ALL ON %I FROM %I;', 'ticket_batch_adviser_'||NEW.ins_id, NEW.student_id);
     --EXECUTE format('REVOKE ALL ON tickets_dean FROM %I;', NEW.student_id);
