@@ -16,8 +16,19 @@ CREATE OR REPLACE FUNCTION create_student_ticket()
 RETURNS TRIGGER 
 LANGUAGE PLPGSQL 
 AS $$ 
+DECLARE
+temp_ins_id integer;
+temp_batch_adviser record;
 BEGIN
     EXECUTE format('CREATE TABLE %I (course_id char(5) NOT NULL, approved char(3));', 'ticket_student_'||NEW.student_id);
+
+    FOR temp_ins_id in (select ins_id from instructor) LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'ticket_student_'||NEW.student_id, 'instructor_'||temp_ins_id);
+    END LOOP;
+
+    FOR temp_batch_adviser in select * from batch_adviser LOOP 
+        EXECUTE format('GRANT SELECT ON %I TO %I;', 'ticket_student_'||NEW.student_id, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
+    END LOOP;
     return NEW;
 END;
 $$;
