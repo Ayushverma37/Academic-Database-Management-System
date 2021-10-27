@@ -521,6 +521,26 @@ EXECUTE PROCEDURE _check_capacity();*/
 
 
 
+-- trigger and procedure for checking valid user
+CREATE OR REPLACE FUNCTION _check_valid_user()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+curr_user VARCHAR(20);
+user_dean VARCHAR(20); 
+BEGIN
+    select current_user into curr_user;
+    user_dean:= postgres;
+    IF (curr_user != NEW.student_id) AND (curr_user!=user_dean) THEN
+        RAISE EXCEPTION 'Invalid user attempting to register in course';
+    END IF;
+    return NEW;
+END;
+$$;
+
+
+
 -- *****************************************************************************************
 
 
@@ -640,6 +660,12 @@ BEGIN
     END LOOP;
 
     -- triggers on student registration
+    -- trigger for checking valid user
+    EXECUTE format('CREATE TRIGGER check_valid_user
+    Before INSERT
+    ON %I
+    FOR EACH ROW
+    EXECUTE PROCEDURE _check_valid_user;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for timetable_slot checking
     EXECUTE format('CREATE TRIGGER course_in_timetable_slot
     Before INSERT
