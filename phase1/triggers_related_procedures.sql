@@ -597,6 +597,7 @@ DECLARE
 temp_student_id char(11);
 temp_ins_id integer;
 temp_batch_adviser record;
+temp_batch_adviser_2 integer;
 BEGIN
     EXECUTE format('CREATE TABLE %I (
         course_id CHAR(5) NOT NULL PRIMARY KEY,
@@ -650,11 +651,27 @@ BEGIN
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'instructor_'||temp_ins_id);
     END LOOP;
 
-    FOR temp_batch_adviser in select * from batch_adviser LOOP 
+    FOR temp_batch_adviser_2 in select * from batch_adviser LOOP 
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'course_offering'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'section'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
         EXECUTE format('GRANT SELECT ON %I TO %I;', 'student_registration'||'_'||NEW.semester||'_'||NEW.year, 'batch_adviser_'||temp_batch_adviser.ins_id||'_'||temp_batch_adviser.batch);
     END LOOP;
+
+    Delete from timetable_slot_list;
+
+    FOR temp_student_id in select student_id from student LOOP 
+        EXECUTE format('DELETE from %I;', 'ticket_student_'||temp_student_id);
+    END LOOP;
+
+    FOR temp_ins_id in select ins_id from instructor LOOP 
+        EXECUTE format('DELETE from %I;', 'ticket_instructor_'||temp_ins_id);
+    END LOOP;
+
+    FOR temp_batch_adviser_2 in select ins_id from batch_adviser LOOP 
+        EXECUTE format('DELETE from %I;', 'ticket_batch_adviser_'||temp_batch_adviser_2);
+    END LOOP;
+
+    DELETE from tickets_dean;
 
     -- triggers on student registration
     -- trigger for checking valid user
