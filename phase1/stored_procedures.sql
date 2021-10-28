@@ -60,7 +60,7 @@ BEGIN
     BEGIN
         select semester into temp_semester from current_sem_and_year;
         select year into temp_year from current_sem_and_year;
-        EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L);', 'section'||'_'||NEW.semester||'_'||NEW.year, section_id, course_id, ins_id, classroom);
+        EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L);', 'section'||'_'||temp_semester||'_'||temp_year, section_id, course_id, ins_id, classroom);
     END;
     END IF;
 END;
