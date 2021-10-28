@@ -129,7 +129,7 @@ END;
 $$;
 
 -- procedure to upload grades to course_grade table by instructor from .csv file
-CREATE OR REPLACE FUNCTION get_grades_from_file(file_path VARCHAR(100), in_course_id char(5))
+CREATE OR REPLACE FUNCTION get_grades_from_file(file_path VARCHAR(100), in_course_id char(5), ins_id integer)
 RETURNS VOID
 LANGUAGE PLPGSQL 
 AS $$ 
@@ -137,14 +137,27 @@ DECLARE
 temp_semester integer;
 temp_year integer;
 comma_literal char(1);
+curr_user VARCHAR(20);
+user_dean VARCHAR(20);
+ins_login VARCHAR(20);
 BEGIN 
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
-    comma_literal := ',';
-    CREATE temp TABLE temp_grade (student_id char(11), grade integer);
-    EXECUTE format('copy temp_grade FROM %L DELIMITER %L CSV HEADER;', file_path, comma_literal);
-    EXECUTE format('UPDATE %I as gg SET grade = temp_grade.grade FROM temp_grade where gg.student_id = temp_grade.student_id;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year);
-    DROP table temp_grade;
+    select current_user into curr_user;
+    user_dean:= 'postgres';
+    ins_login:='instructor_'||ins_id;
+    IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
+        RAISE EXCEPTION 'Invalid user attempting to offer course';
+    END IF;
+    IF (curr_user = ins_login) OR (curr_user=user_dean) THEN
+    BEGIN
+        comma_literal := ',';
+        CREATE temp TABLE temp_grade (student_id char(11), grade integer);
+        EXECUTE format('copy temp_grade FROM %L DELIMITER %L CSV HEADER;', file_path, comma_literal);
+        EXECUTE format('UPDATE %I as gg SET grade = temp_grade.grade FROM temp_grade where gg.student_id = temp_grade.student_id;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year);
+        DROP table temp_grade;
+    END;
+    end if;
 END;
 $$;
 
