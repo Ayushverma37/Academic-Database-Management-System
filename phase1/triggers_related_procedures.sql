@@ -520,7 +520,7 @@ EXECUTE PROCEDURE _check_capacity();*/
 
 
 -- trigger and procedure for checking valid user
-CREATE OR REPLACE FUNCTION _check_valid_user()
+CREATE OR REPLACE FUNCTION a_check_valid_user()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
@@ -676,11 +676,11 @@ BEGIN
 
     -- triggers on student registration
     -- trigger for checking valid user
-    EXECUTE format('CREATE TRIGGER check_valid_user
+    EXECUTE format('CREATE TRIGGER a_check_valid_user
     Before INSERT
     ON %I
     FOR EACH ROW
-    EXECUTE PROCEDURE _check_valid_user();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
+    EXECUTE PROCEDURE a_check_valid_user();', 'student_registration'||'_'||NEW.semester||'_'||NEW.year);
     -- trigger for timetable_slot checking
     EXECUTE format('CREATE TRIGGER course_in_timetable_slot
     Before INSERT
