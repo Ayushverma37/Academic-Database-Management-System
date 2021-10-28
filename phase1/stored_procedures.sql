@@ -25,13 +25,15 @@ temp_semester INTEGER;
 temp_year INTEGER;
 curr_user VARCHAR(20);
 user_dean VARCHAR(20);
+ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
     user_dean:= 'postgres';
-    IF (curr_user != ins_id) AND (curr_user!=user_dean) THEN
+    ins_login:='instructor_'||ins_id;
+    IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to offer course';
     END IF;
-    IF (curr_user = ins_id) OR (curr_user=user_dean) THEN
+    IF (curr_user = ins_login) OR (curr_user=user_dean) THEN
     BEGIN
         select semester into temp_semester from current_sem_and_year;
         select year into temp_year from current_sem_and_year;
@@ -50,13 +52,15 @@ temp_semester INTEGER;
 temp_year INTEGER;
 curr_user VARCHAR(20);
 user_dean VARCHAR(20);
+ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
     user_dean:= 'postgres';
-    IF (curr_user != ins_id) AND (curr_user!=user_dean) THEN
+    ins_login:= 'instructor_'||ins_id;
+    IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to make an entry into section table';
     END IF;
-    IF (curr_user = ins_id) OR (curr_user=user_dean) THEN
+    IF (curr_user = ins_login) OR (curr_user=user_dean) THEN
     BEGIN
         select semester into temp_semester from current_sem_and_year;
         select year into temp_year from current_sem_and_year;
@@ -137,10 +141,10 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     comma_literal := ',';
-    EXECUTE format('COPY %I(student_id, grade)
-                    FROM %L
-                    DELIMITER %L
-                    CSV HEADER;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year, file_path, comma_literal);
+    CREATE temp TABLE temp_grade (student_id char(11), grade integer);
+    EXECUTE format('\copy temp_grade FROM %L DELIMITER %L CSV HEADER;', file_path, comma_literal);
+    EXECUTE format('UPDATE %I as gg SET grade = temp_grade.grade FROM temp_grade where gg.student_id = temp_grade.student_id;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year);
+    DROP table temp_grade;
 END;
 $$;
 
