@@ -142,7 +142,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     comma_literal := ',';
     CREATE temp TABLE temp_grade (student_id char(11), grade integer);
-    EXECUTE format('\copy temp_grade FROM %L DELIMITER %L CSV HEADER;', file_path, comma_literal);
+    EXECUTE format('copy temp_grade FROM %L DELIMITER %L CSV HEADER;', file_path, comma_literal);
     EXECUTE format('UPDATE %I as gg SET grade = temp_grade.grade FROM temp_grade where gg.student_id = temp_grade.student_id;', 'grade_'||in_course_id||'_'||temp_semester||'_'||temp_year);
     DROP table temp_grade;
 END;
