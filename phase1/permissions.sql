@@ -35,6 +35,7 @@ DECLARE
 temp_student_id char(11);
 BEGIN 
     EXECUTE format('CREATE USER %I WITH ENCRYPTED PASSWORD %L;', 'instructor_'||NEW.ins_id, 'abc');
+    EXECUTE format('GRANT pg_read_server_files TO %I;', 'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON current_sem_and_year TO %I;',  'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON timetable_slot_list TO %I;',  'instructor_'||NEW.ins_id);
     EXECUTE format('GRANT SELECT ON student TO %I;',  'instructor_'||NEW.ins_id);
