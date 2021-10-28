@@ -54,7 +54,7 @@ BEGIN
     select current_user into curr_user;
     user_dean:= 'postgres';
     IF (curr_user != ins_id) AND (curr_user!=user_dean) THEN
-        RAISE EXCEPTION 'Invalid user attempting to offer course';
+        RAISE EXCEPTION 'Invalid user attempting to make an entry into section table';
     END IF;
     IF (curr_user = ins_id) OR (curr_user=user_dean) THEN
     BEGIN
