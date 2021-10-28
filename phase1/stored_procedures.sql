@@ -41,6 +41,30 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION entry_section(section_id INTEGER, course_id CHAR(5), ins_id INTEGER, classroom char(5))
+RETURNS VOID
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+temp_semester INTEGER;
+temp_year INTEGER;
+curr_user VARCHAR(20);
+user_dean VARCHAR(20);
+BEGIN
+    select current_user into curr_user;
+    user_dean:= 'postgres';
+    IF (curr_user != ins_id) AND (curr_user!=user_dean) THEN
+        RAISE EXCEPTION 'Invalid user attempting to offer course';
+    END IF;
+    IF (curr_user = ins_id) OR (curr_user=user_dean) THEN
+    BEGIN
+        select semester into temp_semester from current_sem_and_year;
+        select year into temp_year from current_sem_and_year;
+        EXECUTE format('INSERT INTO %I values(%L, %L, %L, %L);', 'section'||'_'||NEW.semester||'_'||NEW.year, section_id, course_id, ins_id, classroom);
+    END;
+    END IF;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION course_catalog_entry(course_id char(5), L numeric, T numeric, P numeric, S numeric, C numeric, course_id1 char(5), course_id2 char(5), course_id3 char(5), course_id_Not_Elligible char(5))
 RETURNS VOID
