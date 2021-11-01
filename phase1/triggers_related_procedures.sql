@@ -439,13 +439,13 @@ cgpaReq numeric;
 temp_semester INTEGER;
 temp_year INTEGER;
 BEGIN
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    EXECUTE format ('select cgpa_criterion from %I as CO where CO.course_id=%L;', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into cgpaReq;
     IF cgpaReq IS NOT NULL THEN
     BEGIN
         curr_grade:=curr_cgpa(NEW.student_id);
-        select semester into temp_semester from current_sem_and_year;
-        select year into temp_year from current_sem_and_year;
         -- select cgpa_criterion into cgpaReq from Course_Offering as CO where CO.course_id=NEW.course_id;
-        EXECUTE format ('select cgpa_criterion from %I as CO where CO.course_id=%L;', 'course_offering_'||temp_semester||'_'||temp_year, NEW.course_id) into cgpaReq;
         IF (curr_grade<cgpaReq) THEN
         RAISE EXCEPTION 'cgpa of Student is less than cgpa criteria for this course';
         END IF;
