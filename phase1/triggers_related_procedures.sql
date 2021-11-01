@@ -141,7 +141,37 @@ ON Student_Registration
 FOR EACH ROW
 EXECUTE PROCEDURE check_credit_limit();*/
 
-
+-- procedure for ticket_insertion
+CREATE OR REPLACE FUNCTION generate_ticket(student_id char(11), course_id char(5))
+RETURNS VOID
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+credits_registered numeric;
+max_credits_allowed numeric;
+credits_in_this_sem numeric;
+credits_for_new_course numeric;
+temp_semester INTEGER;
+temp_year INTEGER;
+stud_batch INTEGER;
+curr_user VARCHAR(20);
+user_dean VARCHAR(20); 
+BEGIN
+    select current_user into curr_user;
+    user_dean:= 'postgres';
+    IF (curr_user != student_id) AND (curr_user!=user_dean) THEN
+        RAISE EXCEPTION 'Invalid user attempting to register in course';
+    END IF;
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    max_credits_allowed := 1.25*credits_registered;
+    credits_in_this_sem := get_credits_registered_in_this_sem(student_id);
+    select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = course_id;
+    if credits_for_new_course + credits_in_this_sem > max_credits_allowed then
+        EXECUTE format('INSERT into %I values(%L, %L);','ticket_student_'||student_id, course_id, NULL);
+    end if;
+END;
+$$;
 
 
 
