@@ -167,7 +167,7 @@ BEGIN
     credits_in_this_sem := get_credits_registered_in_this_sem(student_id);
     select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = in_course_id;
     if credits_for_new_course + credits_in_this_sem > max_credits_allowed then
-        EXECUTE format('INSERT into %I values(%L, %L);','ticket_student_'||student_id, course_id, NULL);
+        EXECUTE format('INSERT into %I values(%L, %L);','ticket_student_'||student_id, in_course_id, NULL);
         raise notice 'Tickiet generated';
     end if;
 END;
