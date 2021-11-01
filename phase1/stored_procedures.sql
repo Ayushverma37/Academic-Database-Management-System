@@ -2,17 +2,23 @@
 
 -- procedure for student registration in a course
 -- procedures to be implemented: allot_section()
-CREATE OR REPLACE FUNCTION registration_in_course(student_id char(11), course_id char(5), section_id INTEGER)
+CREATE OR REPLACE FUNCTION registration_in_course(student_id char(11), in_course_id char(5), in_section_id INTEGER)
 RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
 DECLARE
 temp_semester INTEGER;
 temp_year INTEGER;
+section_record INTEGER;
 BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
-    EXECUTE format('INSERT INTO %I values(%L, %L, %L);','student_registration'||'_'||temp_semester||'_'||temp_year, student_id, course_id, section_id);
+    FOR section_record in EXECUTE format('select S.section_id from %I as S where S.course_id = %L;', 'section_'||temp_semester||'_'||temp_year, in_course_id) LOOP 
+        if in_section_id = section_record then 
+            EXECUTE format('INSERT INTO %I values(%L, %L, %L);','student_registration'||'_'||temp_semester||'_'||temp_year, student_id, in_course_id, in_section_id);
+            return;
+        end if;
+    end loop;
 END;
 $$;
 
