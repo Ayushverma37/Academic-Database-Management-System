@@ -141,7 +141,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE check_credit_limit();*/
 
 -- procedure for ticket_insertion
-CREATE OR REPLACE FUNCTION generate_ticket(student_id char(11), course_id char(5))
+CREATE OR REPLACE FUNCTION generate_ticket(student_id char(11), in_course_id char(5))
 RETURNS VOID
 LANGUAGE PLPGSQL
 AS $$
@@ -165,7 +165,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(student_id);
-    select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = course_id;
+    select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = in_course_id;
     if credits_for_new_course + credits_in_this_sem > max_credits_allowed then
         EXECUTE format('INSERT into %I values(%L, %L);','ticket_student_'||student_id, course_id, NULL);
         raise notice 'Tickiet generated';
