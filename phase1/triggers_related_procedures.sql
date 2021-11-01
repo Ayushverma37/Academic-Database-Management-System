@@ -163,6 +163,7 @@ BEGIN
     END IF;
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
+    credits_registered := get_registered_credits_previous_2_semester(student_id, temp_semester, temp_year);
     max_credits_allowed := 1.25*credits_registered;
     credits_in_this_sem := get_credits_registered_in_this_sem(student_id);
     select CC.C into credits_for_new_course from Course_Catalog as CC where CC.course_id = in_course_id;
