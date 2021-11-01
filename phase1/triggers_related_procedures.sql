@@ -159,7 +159,7 @@ BEGIN
     select current_user into curr_user;
     user_dean:= 'postgres';
     IF (curr_user != student_id) AND (curr_user!=user_dean) THEN
-        RAISE EXCEPTION 'Invalid user attempting to register in course';
+        RAISE EXCEPTION 'Invalid user attempting to generate ticket';
     END IF;
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
