@@ -114,11 +114,11 @@ temp_semester INTEGER;
 temp_year INTEGER;
 stud_batch INTEGER;
 BEGIN
+    select semester into temp_semester from current_sem_and_year;
+    select year into temp_year from current_sem_and_year;
+    select batch into stud_batch from Student where NEW.student_id=Student.student_id;
     IF stud_batch<temp_year THEN
     BEGIN
-        select semester into temp_semester from current_sem_and_year;
-        select year into temp_year from current_sem_and_year;
-        select batch into stud_batch from Student where NEW.student_id=Student.student_id;
         credits_registered := get_registered_credits_previous_2_semester(NEW.student_id, temp_semester, temp_year);
         max_credits_allowed := 1.25*credits_registered;
         credits_in_this_sem := get_credits_registered_in_this_sem(NEW.student_id);
