@@ -126,7 +126,8 @@ BEGIN
         if credits_for_new_course + credits_in_this_sem > max_credits_allowed then
             --ticket generation function call
             EXECUTE format('INSERT into %I values(%L, %L);','ticket_student_'||NEW.student_id, NEW.course_id, NULL);
-            raise exception 'Credit limit exceeded, ticket generated';
+            raise notice 'Credit limit exceeded, ticket generated';
+            return NULL;
         end if;
     END;
     END IF;
