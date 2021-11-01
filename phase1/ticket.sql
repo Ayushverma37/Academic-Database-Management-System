@@ -175,7 +175,6 @@ $$;
 -- Procedure to convey final decision to student about ticket approved or not.
 -- If approved -- set column of student ticket table to YES else NO.
 -- Also add rows in student registration, if the ticket is approved.
-
 CREATE OR REPLACE FUNCTION convey_final_decision()
 RETURNS VOID 
 LANGUAGE PLPGSQL 
@@ -203,7 +202,9 @@ BEGIN
                 -- get a section for the course 
                 EXECUTE format('select section_id from %I where course_id = %L and ins_id = %L;', 'section_'||temp_semester||'_'||temp_year, dean_ticket_row.course_id, temp_ins_id) into temp_section;
                 -- add row in student registration
+                EXECUTE format('DROP TRIGGER z_credit_limit_trigger on %I;', 'student_registration_'||temp_semester||'_'||temp_year);
                 EXECUTE format('INSERT INTO %I values(%L, %L, %L);', 'student_registration_'||temp_semester||'_'||temp_year, dean_ticket_row.student_id, dean_ticket_row.course_id, temp_section);
+                EXECUTE format('CREATE TRIGGER z_credit_limit_trigger Before INSERT ON %I FOR EACH ROW EXECUTE PROCEDURE z_check_credit_limit();', 'student_registration'||'_'||temp_semester||'_'||temp_year);
             end if;
         end if;
     END LOOP;
