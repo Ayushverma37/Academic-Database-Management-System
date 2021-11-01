@@ -82,7 +82,6 @@ CREATE TABLE tickets_dean (student_id char(11) NOT NULL, course_id char(5) NOT N
 
 -- search all student ticket tables for tickets of courses taught by the instructor
 -- add them to instructor ticket table
-
 CREATE OR REPLACE FUNCTION get_tickets_instructor(in_course_id char(5), in_ins_id INTEGER)
 RETURNS VOID
 LANGUAGE PLPGSQL 
@@ -90,7 +89,17 @@ AS $$
 DECLARE 
 temp_student_id char(11);
 ticket_row record;
+curr_user VARCHAR(20);
+user_dean VARCHAR(20);
+ins_login VARCHAR(20);
 BEGIN 
+    -- check if valid user is accessing the course
+    select current_user into curr_user;
+    user_dean:= 'postgres';
+    ins_login:='instructor_'||in_ins_id;
+    IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
+        RAISE EXCEPTION 'Invalid user attempting to get tickets';
+    END IF;
     -- get all student_id
     for temp_student_id in select student_id from Student LOOP
         --access their ticket tables
