@@ -1,5 +1,5 @@
 -- dean login
-create role dean login superuser createdb createrole password 'dean';
+create role dean login superuser createrole password 'dean';
 
 -- Tables created
 
