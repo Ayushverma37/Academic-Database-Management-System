@@ -1,16 +1,7 @@
--- Tables created
---                List of relations
--- Schema |         Name         | Type  |  Owner
-----------+----------------------+-------+----------
--- public | course_catalog       | table | postgres
--- public | course_offering      | table | postgres
--- public | instructor           | table | postgres
--- public | section              | table | postgres
--- public | student              | table | postgres
--- public | student_registration | table | postgres
--- public | timetable_slot_list  | table | postgres
---(7 rows)
+-- dean login
+create role dean login superuser createdb createrole password 'dean';
 
+-- Tables created
 
 -- Table for current_sem and year
 CREATE TABLE current_sem_and_year(
