@@ -157,7 +157,7 @@ curr_user VARCHAR(20);
 user_dean VARCHAR(20); 
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     IF (curr_user != student_id) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to generate ticket';
     END IF;
@@ -561,7 +561,7 @@ curr_user VARCHAR(20);
 user_dean VARCHAR(20); 
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     IF (curr_user != NEW.student_id) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to register in course';
     END IF;
