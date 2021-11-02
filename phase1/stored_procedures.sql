@@ -182,6 +182,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     EXECUTE format('DROP TABLE IF EXISTS %I;', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
     EXECUTE format('CREATE TABLE %I (course_id char(5), grade integer);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year, in_student_id);
     for trans_student_row in EXECUTE format('select * from %I;', 'trans_'||in_student_id) LOOP
         if trans_student_row.semester = temp_semester AND trans_student_row.year = temp_year then 
             EXECUTE format('INSERT into %I values(%L, %L);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year, trans_student_row.course_id, trans_student_row.grade);
