@@ -95,7 +95,7 @@ ins_login VARCHAR(20);
 BEGIN 
     -- check if valid user is accessing the course
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||in_ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to get tickets';
