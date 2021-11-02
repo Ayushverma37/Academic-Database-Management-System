@@ -34,7 +34,7 @@ user_dean VARCHAR(20);
 ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to offer course';
@@ -61,7 +61,7 @@ user_dean VARCHAR(20);
 ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:= 'instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to make an entry into section table';
@@ -150,7 +150,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to offer course';
