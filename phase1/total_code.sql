@@ -7,18 +7,6 @@
 -- permissions.sql 
 
 -- Tables created
---                List of relations
--- Schema |         Name         | Type  |  Owner
-----------+----------------------+-------+----------
--- public | course_catalog       | table | postgres
--- public | course_offering      | table | postgres
--- public | instructor           | table | postgres
--- public | section              | table | postgres
--- public | student              | table | postgres
--- public | student_registration | table | postgres
--- public | timetable_slot_list  | table | postgres
---(7 rows)
-
 
 -- Table for current_sem and year
 CREATE TABLE current_sem_and_year(
@@ -136,7 +124,6 @@ CREATE TABLE Timetable_slot_list(
     year INTEGER NOT NULL,
     PRIMARY KEY(student_id, course_id, semester, year)
 );
-
 CREATE TABLE ticket_advisor (
     student_id char(11) NOT NULL,
     course_id char(5) NOT NULL,
@@ -144,7 +131,6 @@ CREATE TABLE ticket_advisor (
     year INTEGER NOT NULL,
     PRIMARY KEY(student_id, course_id, semester, year)
 );
-
 CREATE TABLE ticket_dean (
     student_id char(11) NOT NULL,
     course_id char(5) NOT NULL,
@@ -312,7 +298,7 @@ curr_user VARCHAR(20);
 user_dean VARCHAR(20); 
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     IF (curr_user != student_id) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to generate ticket';
     END IF;
@@ -716,7 +702,7 @@ curr_user VARCHAR(20);
 user_dean VARCHAR(20); 
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     IF (curr_user != NEW.student_id) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to register in course';
     END IF;
@@ -969,7 +955,7 @@ user_dean VARCHAR(20);
 ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to offer course';
@@ -996,7 +982,7 @@ user_dean VARCHAR(20);
 ins_login VARCHAR(20);
 BEGIN
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:= 'instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to make an entry into section table';
@@ -1085,7 +1071,7 @@ BEGIN
     select semester into temp_semester from current_sem_and_year;
     select year into temp_year from current_sem_and_year;
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to offer course';
@@ -1117,6 +1103,7 @@ BEGIN
     select year into temp_year from current_sem_and_year;
     EXECUTE format('DROP TABLE IF EXISTS %I;', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
     EXECUTE format('CREATE TABLE %I (course_id char(5), grade integer);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year);
+    EXECUTE format('GRANT SELECT ON %I TO %I;', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year, in_student_id);
     for trans_student_row in EXECUTE format('select * from %I;', 'trans_'||in_student_id) LOOP
         if trans_student_row.semester = temp_semester AND trans_student_row.year = temp_year then 
             EXECUTE format('INSERT into %I values(%L, %L);', 'report_of_'||in_student_id || '_'||temp_semester||'_'||temp_year, trans_student_row.course_id, trans_student_row.grade);
@@ -1224,7 +1211,7 @@ ins_login VARCHAR(20);
 BEGIN 
     -- check if valid user is accessing the course
     select current_user into curr_user;
-    user_dean:= 'postgres';
+    user_dean:= 'dean';
     ins_login:='instructor_'||in_ins_id;
     IF (curr_user != ins_login) AND (curr_user!=user_dean) THEN
         RAISE EXCEPTION 'Invalid user attempting to get tickets';
