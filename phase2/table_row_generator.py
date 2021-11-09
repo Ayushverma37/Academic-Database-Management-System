@@ -1,4 +1,6 @@
 # This file creates table entries of all the tables
+
+# random row generation for actor table
 import numpy as np
 import random
 import string
