@@ -40,3 +40,24 @@ for z in range(80000):
     f_pc.write('INSERT INTO production_company values (' + str(data_pc[z]) + ',' + '\'' + names_list_pc[z] + '\''+  ',' + '\'' + address_list_pc[z] + '\'' + ');\n')
 
 f_pc.close()
+
+
+# random row generation for movie table
+
+mid = np.random.permutation(1000000)
+chars_name = string.ascii_lowercase     # list of chars to be used
+size_name = 10                          # size of the random string
+name_movie_list = []                    # list of random strings
+imdb = []
+for y in range(1000000):
+    name_movie_list.append(random_string(size_name, chars_name))
+    imdb.append(round(random.uniform(1.0, 5.0), 2))
+
+pc_movie = np.random.permutation(np.append(np.random.randint(1, 501, 900000), np.random.randint(501, 80001, 100000)))
+year = np.random.randint(1900, 2001, 1000000)
+
+f = open('rows2.txt', 'w')               # opening a file to write insert commands
+for z in range(1000000):
+    f.write('INSERT INTO movie values('+str(mid[z])+', \''+name_movie_list[z]+'\', '+ str(year[z]) + ', ' + str(imdb[z]) + ', ' + str(pc_movie[z]) + ');\n')
+
+f.close()
