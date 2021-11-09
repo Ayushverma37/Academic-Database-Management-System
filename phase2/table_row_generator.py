@@ -10,9 +10,9 @@ def random_string(size, chars):
     return ''.join(random.choice(chars) for x in range(size))
 
 
-data = np.random.permutation(80000)
+data = np.random.permutation(300000)
 chars_name = string.ascii_lowercase
-size_name = 10
+size_name = 15
 names_list = []
 for y in range(80000):
     names_list.append(random_string(size_name, chars_name))
