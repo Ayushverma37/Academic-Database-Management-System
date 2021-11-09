@@ -1,1 +1,1 @@
-# This file creates table netries of all the tables
+# This file creates table entries of all the tables
