@@ -18,7 +18,7 @@ for y in range(80000):
     names_list.append(random_string(size_name, chars_name))
 
 f = open('rows.txt', 'w')
-for z in range(80000):
+for z in range(300000):
     f.write('INSERT INTO actor values (' + str(data[z]) + ',' + '\'' + names_list[z] + '\'' + ');\n')
 
 f.close()
