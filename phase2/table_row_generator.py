@@ -35,7 +35,7 @@ address_list_pc = []
 size_address_pc = 30
 for y in range(80000):
     address_list_pc.append(random_string(size_address_pc, chars_address_pc))
-f_pc = open('production.txt', 'w')
+f_pc = open('production.sql', 'w')
 for z in range(80000):
     f_pc.write('INSERT INTO production_company values (' + str(data_pc[z]) + ',' + '\'' + names_list_pc[z] + '\''+  ',' + '\'' + address_list_pc[z] + '\'' + ');\n')
 
