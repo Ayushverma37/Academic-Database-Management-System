@@ -14,7 +14,7 @@ data = np.random.permutation(300000)
 chars_name = string.ascii_lowercase
 size_name = 15
 names_list = []
-for y in range(80000):
+for y in range(300000):
     names_list.append(random_string(size_name, chars_name))
 
 f = open('rows.txt', 'w')
