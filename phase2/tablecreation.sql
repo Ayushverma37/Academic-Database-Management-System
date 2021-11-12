@@ -26,6 +26,6 @@ CREATE TABLE casting(
       m_id INTEGER NOT NULL,
       a_id INTEGER NOT NULL,
       FOREIGN KEY (m_id) REFERENCES movie(m_id),
-      FOREIGN KEY (pc_id) REFERENCES production_company(pc_id),
+      FOREIGN KEY (a_id) REFERENCES actor(a_id),
       PRIMARY KEY(m_id, a_id)
 );
