@@ -61,3 +61,16 @@ for z in range(1000000):
     f.write('INSERT INTO movie values('+str(mid[z])+', \''+name_movie_list[z]+'\', '+ str(year[z]) + ', ' + str(imdb[z]) + ', ' + str(pc_movie[z]) + ');\n')
 
 f.close()
+
+
+# random row generation for casting table
+mid_casting=np.random.permutation(1000000)
+aid_casting=np.random.permutation(np.append(np.random.randint(1, 10001, 3800000), np.random.randint(10001, 300001, 200000)))
+f_casting = open('casting.txt', 'w')
+for z in range(1000000):
+    f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*1])+ ');\n')
+    f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*2])+ ');\n')
+    f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*3])+ ');\n')
+    f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*4])+ ');\n')
+
+f_casting.close()
