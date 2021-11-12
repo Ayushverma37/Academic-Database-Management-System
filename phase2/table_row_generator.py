@@ -10,7 +10,7 @@ def random_string(size, chars):
     return ''.join(random.choice(chars) for x in range(size))
 
 
-data = np.random.permutation(300000)
+data = np.random.permutation(300000) + 1
 chars_name = string.ascii_lowercase
 size_name = 15
 names_list = []
@@ -24,7 +24,7 @@ for z in range(300000):
 
 f.close()
 
-data_pc=np.random.permutation(80000)
+data_pc=np.random.permutation(80000) + 1
 chars_name_pc = string.ascii_lowercase
 size_name_pc = 10
 names_list_pc = []
@@ -46,7 +46,7 @@ f_pc.close()
 
 # random row generation for movie table
 
-mid = np.random.permutation(1000000)
+mid = np.random.permutation(1000000) + 1
 chars_name = string.ascii_lowercase     # list of chars to be used
 size_name = 10                          # size of the random string
 name_movie_list = []                    # list of random strings
@@ -67,7 +67,7 @@ f.close()
 
 
 # random row generation for casting table
-mid_casting=np.random.permutation(1000000)
+mid_casting=np.random.permutation(1000000) + 1
 aid_casting=np.random.permutation(np.append(np.random.randint(1, 10001, 3800000), np.random.randint(10001, 300001, 200000)))
 f_casting = open('casting.csv', 'w')
 for z in range(1000000):
