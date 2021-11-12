@@ -75,9 +75,15 @@ for z in range(1000000):
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*2])+ ');\n')
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*3])+ ');\n')
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*4])+ ');\n')
-    f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*1])+'\n')
-    f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*2])+'\n')
-    f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*3])+'\n')
-    f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*4])+'\n')
+    if z==0:
+        f_casting.write(str(mid_casting[0])+','+str(aid_casting[1])+'\n')
+        f_casting.write(str(mid_casting[0])+','+str(aid_casting[2])+'\n')
+        f_casting.write(str(mid_casting[0])+','+str(aid_casting[3])+'\n')
+        f_casting.write(str(mid_casting[0])+','+str(aid_casting[4])+'\n')
+    else:
+        f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*1])+'\n')
+        f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*2])+'\n')
+        f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*3])+'\n')
+        f_casting.write(str(mid_casting[z])+','+str(aid_casting[z*4])+'\n')
 
 f_casting.close()
