@@ -17,7 +17,7 @@ names_list = []
 for y in range(300000):
     names_list.append(random_string(size_name, chars_name))
 
-f = open('rows.txt', 'w')
+f = open('actor.txt', 'w')
 for z in range(300000):
     f.write('INSERT INTO actor values (' + str(data[z]) + ',' + '\'' + names_list[z] + '\'' + ');\n')
 
@@ -56,7 +56,7 @@ for y in range(1000000):
 pc_movie = np.random.permutation(np.append(np.random.randint(1, 501, 900000), np.random.randint(501, 80001, 100000)))
 year = np.random.randint(1900, 2001, 1000000)
 
-f = open('rows2.txt', 'w')               # opening a file to write insert commands
+f = open('movie.txt', 'w')               # opening a file to write insert commands
 for z in range(1000000):
     f.write('INSERT INTO movie values('+str(mid[z])+', \''+name_movie_list[z]+'\', '+ str(year[z]) + ', ' + str(imdb[z]) + ', ' + str(pc_movie[z]) + ');\n')
 
