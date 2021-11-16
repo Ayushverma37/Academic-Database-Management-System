@@ -67,25 +67,47 @@ f.close()
 
 
 # random row generation for casting table
+# mid_casting=np.random.permutation(1000000) + 1
+# aid_casting=np.append(np.random.randint(1, 10001, 950000), np.random.randint(10001, 300001, 50000))
+# f_casting = open('casting.csv', 'w')
+# new_list = []
+# for z in range(1000000):
+    # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*1])+ ');\n')
+    # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*2])+ ');\n')
+    # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*3])+ ');\n')
+    # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*4])+ ');\n')
+#    if z<950000:
+#        new_list.append([mid_casting[z], aid_casting[z]])
+#        new_list.append([mid_casting[z], (aid_casting[z]+1)%10000 + 1])
+#        new_list.append([mid_casting[z], (aid_casting[z]+2)%10000 + 1])
+#        new_list.append([mid_casting[z], (aid_casting[z]+3)%10000 + 1])  
+#    else:
+#        new_list.append([mid_casting[z], aid_casting[z]])
+#        new_list.append([mid_casting[z], (aid_casting[z]+1)%289998 + 10001])
+#        new_list.append([mid_casting[z], (aid_casting[z]+2)%289998 + 10002])
+#        new_list.append([mid_casting[z], (aid_casting[z]+3)%289998 + 10003])
+
+# new_list = np.random.permutation(new_list)
+
+# for z in range(4000000):
+#    f_casting.write(str(new_list[z][0])+','+str(new_list[z][1])+'\n')
+
+# f_casting.close()
+
+# random row generation for casting table
 mid_casting=np.random.permutation(1000000) + 1
-aid_casting=np.append(np.random.randint(1, 10001, 950000), np.random.randint(10001, 300001, 50000))
-f_casting = open('casting.csv', 'w')
+aid_casting=np.random.randint(1, 300001, 1000000)
+f_casting = open('casting2.csv', 'w')
 new_list = []
 for z in range(1000000):
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*1])+ ');\n')
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*2])+ ');\n')
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*3])+ ');\n')
     # f_casting.write('INSERT INTO casting values('+str(mid_casting[z])+','+ str(aid_casting[z*4])+ ');\n')
-    if z<950000:
-        new_list.append([mid_casting[z], aid_casting[z]])
-        new_list.append([mid_casting[z], (aid_casting[z]+1)%10000 + 1])
-        new_list.append([mid_casting[z], (aid_casting[z]+2)%10000 + 1])
-        new_list.append([mid_casting[z], (aid_casting[z]+3)%10000 + 1])  
-    else:
-        new_list.append([mid_casting[z], aid_casting[z]])
-        new_list.append([mid_casting[z], (aid_casting[z]+1)%289998 + 10001])
-        new_list.append([mid_casting[z], (aid_casting[z]+2)%289998 + 10002])
-        new_list.append([mid_casting[z], (aid_casting[z]+3)%289998 + 10003])
+    new_list.append([mid_casting[z], aid_casting[z]])
+    new_list.append([mid_casting[z], (aid_casting[z]+1)%300000 + 1])
+    new_list.append([mid_casting[z], (aid_casting[z]+2)%300000 + 1])
+    new_list.append([mid_casting[z], (aid_casting[z]+3)%300000 + 1])  
 
 new_list = np.random.permutation(new_list)
 
